@@ -98,12 +98,12 @@ class DataGridHeaders(Resource):
 @check_namespace.route('/exposures')
 class Exposures(Resource):
     get_req_params = {"filename": "Excel file name", "worksheet": "Worksheet name", "page": "The page number",
-                      "worksheet_id": "The worksheet created Id", "nrows": "Number of rows to preview"}
+                      "worksheet_id": "The worksheet created Id", "nrows": "Number of rows to preview","domain_id":"domain_id"}
 
     @check_namespace.doc("Get paginated exposures")
     @check_namespace.doc(params=get_req_params)
     def get(self):
-        params = {param: request.args.get(param) for param in ["filename", "worksheet", "worksheet_id", "page",
+        params = {param: request.args.get(param) for param in ["filename","domain_id", "worksheet", "worksheet_id", "page",
                                                                "nrows"]}
         exposures = read_exposures(request, params)
 

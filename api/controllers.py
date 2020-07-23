@@ -14,6 +14,7 @@ from api.utils.storage import get_mapped_df, get_imported_data_df, save_mapped_d
 from services.dataframe import apply_check_modifications, calculate_field
 
 
+
 def trim_fraction(column):
     if '.' in column:
         return column[:column.rfind('.')]
@@ -128,7 +129,14 @@ def read_exposures(request, params):
     path = get_mapping_path(params["filename"], params["worksheet"])
     data = paginator.load_paginated_dataframe(path, 10, params["worksheet_id"])
 
-    exposures = paginator.get_paginated_response(data)
+    headers = paginator.load_headers(path)
+    domain_id = params["domain_id"]
+    lables=checker_document.get_target_fields(domain_id, query={"name": {"$in": headers}})
+
+    lables = list(map(lambda x: {"field":x["name"], "headerName":x["label"]},lables))
+
+    exposures = paginator.get_paginated_response(data,lables)
+
 
     return exposures
 

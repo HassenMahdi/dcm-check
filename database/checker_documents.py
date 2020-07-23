@@ -33,10 +33,10 @@ class CheckerDocument:
 
         return target_names
 
-    def get_target_fields(self, domain_id):
+    def get_target_fields(self, domain_id, query = {} ):
         Table = "fields"
         scor_fields = mongo.db[f"{domain_id}.{Table}"]
-        return list(scor_fields.find({}))
+        return list(scor_fields.find(query))
 
     def get_ref_value(self, ref_collection, field_name, condition):
         """Fetches all field names in the passed collection"""

@@ -75,6 +75,14 @@ class Paginator:
             "last": self.__generate_last_link()
         }
 
+    def load_headers(self, sheetPath):
+        return pd.read_csv(sheetPath,
+                                engine='c',
+                                dtype=str,
+                                na_filter=False,
+                                nrows=0, sep=';').columns.tolist()
+
+
     def load_paginated_dataframe(self, sheetPath, totalExposures, worksheet_id):
         self.total = totalExposures
         last_page = math.ceil(self.total / self.limit)
@@ -107,7 +115,7 @@ class Paginator:
 
         return exposures
 
-    def get_paginated_response(self, data):
+    def get_paginated_response(self, data,labels):
         paginated_response = {
             "_links": self.links,
             "current_page": self.page,
@@ -115,6 +123,8 @@ class Paginator:
             "last_page": self.last_page,
             "total": self.total,
             "count": len(data),
+            "headers":labels,
+
             "data": data.to_dict(orient='records')
         }
 
