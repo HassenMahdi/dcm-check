@@ -132,9 +132,7 @@ def read_exposures(request, params):
     headers = paginator.load_headers(path)
     domain_id = params["domain_id"]
     lables=checker_document.get_target_fields(domain_id, query={"name": {"$in": headers}})
-
     lables = list(map(lambda x: {"field":x["name"], "headerName":x["label"]},lables))
-
     exposures = paginator.get_paginated_response(data,lables)
 
 
@@ -151,12 +149,24 @@ def read_results(params):
     try:
         df = get_check_results_df(params["filename"], params["worksheet"]).loc[offset:end]
         check_results["count"] = df.shape[0]
-
+        result = {}
         for column in df.columns.values:
             check_type, field_code, error_type = eval(column)
             check_results[error_type][field_code] = {}
             check_results[error_type][field_code][check_type] = df.index[df[column] == 'True'].tolist()
-        return check_results
+
+            error = {}
+            indexes = df.index[df[column] == 'True']
+            for index in indexes:
+
+                target = result.setdefault(index, {})
+                target = target.setdefault(field_code, {})
+                target = target.setdefault(error_type, [])
+                target.append(check_type)
+
+
+
+        return result
     except pd.errors.EmptyDataError:
         return check_results
 
