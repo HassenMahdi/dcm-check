@@ -126,7 +126,7 @@ def read_exposures(request, params):
     base_url = request.base_url
     paginator = Paginator(base_url=base_url, query_dict=params, page=int(params["page"]), limit=int(params["nrows"]))
     path = get_mapping_path(params["filename"], params["worksheet"])
-    data = paginator.load_paginated_dataframe(path, worksheet["totalExposures"], params["worksheet_id"])
+    data = paginator.load_paginated_dataframe(path, 10, params["worksheet_id"])
 
     exposures = paginator.get_paginated_response(data)
 

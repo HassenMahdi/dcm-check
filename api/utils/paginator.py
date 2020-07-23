@@ -92,7 +92,7 @@ class Paginator:
                                 dtype=str,
                                 na_filter=False,
                                 skiprows=lambda x: x != 0 and x <= offset,
-                                nrows=self.limit)
+                                nrows=self.limit,sep=';')
 
         modifier_document = ModifierDocument()
         modification = {"indices": list(range(offset, end)), "is_all": False}
@@ -115,10 +115,10 @@ class Paginator:
             "last_page": self.last_page,
             "total": self.total,
             "count": len(data),
-            "exposures": data.to_dict(orient='records'),  # check split, records, or index
+            "data": data.to_dict(orient='records')
         }
 
-        exposures = paginated_response["exposures"]
+        exposures = paginated_response["data"]
         if isinstance(exposures, dict) and "index" in exposures:
             del exposures["index"]
 
