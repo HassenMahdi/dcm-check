@@ -24,13 +24,14 @@ def apply_mapping_transformation(df, params, target_fields):
     """Apply the mapping transformation in case of multiple source mapping"""
 
     checker_document = CheckerDocument()
-    transformed_df = pd.DataFrame(columns=list(target_fields.keys()))
-    default_values = checker_document.get_default_values(params["lob_id"])
-    mappings = checker_document.get_mappings(params["worksheet_id"], params["lob_id"])
+    target_fields_names=[key for key in target_fields.keys()]
+    transformed_df = pd.DataFrame(columns=target_fields_names)
+    default_values = checker_document.get_default_values(params["domain_id"])
+    mappings = checker_document.get_mappings(params["worksheet_id"], params["domain_id"])
 
     for target, source in mappings.items():
-        data_type = target_fields[target]["dataType"]
-        remove_digits = target_fields[target].get("skipDecimalDigits")
+        data_type = target_fields[target]["type"]
+        remove_digits = target_fields[target].get("skipDecimalDigits",None)
         if len(source) > 1:
             if data_type == "string":
                 transformed_df[target] = df[source[0]].str.cat(df[source[1:]].astype(str), sep=" ")
@@ -48,10 +49,10 @@ def apply_mapping_transformation(df, params, target_fields):
     else:
         transformed_df["pd_split"] = "Yes"
     condition = [{"property": "pd_split", "value": transformed_df.loc[0]["pd_split"]}]
-    formulas = checker_document.get_calculated_fields_formula(params["lob_id"], condition, mappings)
+    #formulas = checker_document.get_calculated_fields_formula(params["lob_id"], condition, mappings)
 
-    for field_code, formula in formulas.items():
-        transformed_df[field_code] = calculate_field(transformed_df, formula, mappings, formulas)
+    #for field_code, formula in formulas.items():
+    #   transformed_df[field_code] = calculate_field(transformed_df, formula, mappings, formulas)
 
     if default_values:
         for target_field, default_value in default_values.items():
@@ -64,10 +65,12 @@ def start_check_job(params, modifications={}):
     """Starts the data check service"""
 
     checker_document = CheckerDocument()
-    target_fields = checker_document.get_all_target_fields(params["lob_id"])
+    #TODO: get target fileds by domain and categories
+    target_fields = checker_document.get_all_target_fields(params["domain_id"])
     start = time.time()
     if modifications:
         modifier_document = ModifierDocument()
+        # TODO: get target fileds by domain and categories
         result_df = get_check_results_df(params["filename"], params["worksheet"])
         if modifications["is_all"] or (len(modifications["indices"]) > 100):
             mapped_df = get_mapped_df(params["filename"], params["worksheet"])
@@ -82,14 +85,10 @@ def start_check_job(params, modifications={}):
             skiprows = list(set(range(1, max(modifications["indices"]) + 1)) - 
                        set([index +1 for index in modifications["indices"]]))
             mapped_df = get_mapped_df(params["filename"], params["worksheet"], skiprows=skiprows, nrows=nrows)
-            tiv_df = get_mapped_df(params["filename"], params["worksheet"], skiprows=skiprows, nrows=nrows)
-
             mapped_df.index = modifications["indices"]
-            tiv_df.index = modifications["indices"]
-            tiv_df = modifier_document.load_check_modifications(tiv_df, params["worksheet_id"], modifications)
             modifier_document.save_check_modifications(params["worksheet_id"], modifications, mapped_df)
             final_df = modifier_document.load_check_modifications(mapped_df, params["worksheet_id"], modifications)
-            data_check_result, result_df = check_modifications(final_df, tiv_df, params, target_fields, result_df,
+            data_check_result, result_df = check_modifications(final_df, "tiv_df", params, target_fields, result_df,
                                                                modifications)
         save_check_results_df(result_df, params["filename"], params["worksheet"])
         print("end checks")
@@ -148,7 +147,7 @@ def read_results(params):
         for column in df.columns.values:
             check_type, field_code, error_type = eval(column)
             check_results[error_type][field_code] = {}
-            check_results[error_type][field_code][check_type] = df.index[df[column] == True].tolist()
+            check_results[error_type][field_code][check_type] = df.index[df[column] == 'True'].tolist()
         return check_results
     except pd.errors.EmptyDataError:
         return check_results

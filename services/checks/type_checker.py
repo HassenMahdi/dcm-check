@@ -14,10 +14,14 @@ class TypeChecker(Checker):
     def check_column(self, df, column, empty_column, *args, **kwargs):
         """Checks the data format for a given column"""
 
-        field_type = kwargs.get("field_type", "String")
+        field_type = kwargs.get("field_type", "string")
+
         rgx = self.get_regex(field_type)
         match = df[column].astype(str).str.match("^" + rgx + "$", case=False)
-        return match
+        if field_type =="string":
+            return  match == False
+        else:
+            return  match
 
     def get_regex(self, field_type):
         """Returns a regex that represents the field type"""

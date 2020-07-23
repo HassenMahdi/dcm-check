@@ -3,40 +3,40 @@
 
 from database.connectors import mongo
 import services.cleansing_service as cleansing_service
+from database.fileds import TargetField
 
 
 class CheckerDocument:
 
-    def get_mappings(self, worksheet_id, lob_id):
+    def get_mappings(self,fileId, domainId):
         """Fetches a document from the mappings collection based on the given params"""
 
         mappings = mongo.db.mappings
 
-        mapping = mappings.find_one({"worksheetId": worksheet_id, "lobId": lob_id}, {"_id": 0, "rules": 1})
+        mapping = mappings.find_one({"fileId": fileId, "domainId": domainId}, {"_id": 0, "rules": 1})
         if mapping:
             return {rule["target"]: rule["source"] for rule in mapping["rules"]}
 
-    def get_headers(self, lob_id):
+    def get_headers(self, domain_id):
         """Fetches all the the documents from Scor Fields collection to get lob fields details"""
+        target_fields= self.get_target_fields(domain_id)
+        return [target for target in target_fields]
 
-        scor_fields = mongo.db.scor_fields
-        target_fields = scor_fields.find({"lob": lob_id})
-        headers = []
-        for target in target_fields:
-            headers.append({key: target[key] for key in ["code", "category", "name", "inCategoryOrder", "dataType"]})
+    def get_all_target_fields(self,domain_id):
+        fields_names = self.get_target_fields(domain_id)
+        target_names = {}
+        for field_name in fields_names:
+            code =field_name.get("name","")
+            target_names[code]={'name': field_name.get("name",""),'label': field_name.get("label",""),'description': field_name.get("description",""),
+                                 'category': field_name.get("category",""),'type': field_name.get("type",""),'rules': field_name.get("rules",""),
+                                 'mandatory': field_name.get("mandatory",""),'editable': field_name.get("editable","")}
 
-        return headers
+        return target_names
 
-    def get_all_target_fields(self, lob_id):
-        """Fetches all the the documents from Scor Fields collection to get lob fields details"""
-
-        scor_fields = mongo.db.scor_fields
-        lob_fields = scor_fields.find({"lob": lob_id})
-        target_fields = {}
-        for field in lob_fields:
-            target_fields[field["code"]] = {key: field.get(key) for key in
-                                            ["name", "dataType", "dataCheck", "skipDecimalDigits"]}
-        return target_fields
+    def get_target_fields(self, domain_id):
+        Table = "fields"
+        scor_fields = mongo.db[f"{domain_id}.{Table}"]
+        return list(scor_fields.find({}))
 
     def get_ref_value(self, ref_collection, field_name, condition):
         """Fetches all field names in the passed collection"""
@@ -60,7 +60,7 @@ class CheckerDocument:
     def get_worksheet_metadata(self, worksheet_id):
         """Fetches a document from sheet_metadata collection based on worksheet Id"""
 
-        sheet_metadata = mongo.db.sheet_metadata
+        sheet_metadata = mongo.db.worksheet_metadata
 
         worksheet = sheet_metadata.find_one({"worksheetId": worksheet_id}, projection=["sheetPath", "totalExposures"])
 
@@ -145,10 +145,9 @@ class JobResultDocument:
             job_results.update_one(
                 {'_id': _id},
                 {'$set': {
-                    "totalTIV": job["totalTIV"],
+
                     "jobResult": job["jobResult"],
                     "totalErrors": job["totalErrors"],
-                    "totalExposures": job["totalExposures"],
                     "uniqueErrorLines": job["uniqueErrorLines"],
                 }
                 }, upsert=False
@@ -167,3 +166,16 @@ class JobResultDocument:
         tiv_amount = job_results.find_one({"worksheetId": worksheet_id}, projection=["totalTIV"])
 
         return tiv_amount["totalTIV"]
+
+
+""" def get_all_target_fieldss(self, lob_id):
+        #Fetches all the the documents from Scor Fields collection to get lob fields details
+
+        scor_fields = mongo.db.scor_fields
+        lob_fields = scor_fields.find({"lob": lob_id})
+        target_fields = {}
+        for field in lob_fields:
+            target_fields[field["code"]] = {key: field.get(key) for key in
+                                            ["name", "type", "dataCheck", "skipDecimalDigits"]}
+        return target_fields
+"""

@@ -16,15 +16,16 @@ def run_checks(final_df, params, target_fields, metadata=True):
     result_df = pd.DataFrame()
     unique_errors_lines = set()
     check_empty_df = final_df.isin(["", np.nan, "NaN"])
+    #TODO: change reslut model
     data_check_result = {"filename": params["filename"], "worksheetId": params["worksheet_id"],
-                         "jobId": f"{params['worksheet_id']}_job", "lobName": params["lob_name"],
-                         "lobId": params["lob_id"], "totalExposures": final_df.shape[0], "uniqueErrorLines": 0,
-                         "totalErrors": 0, "totalTIV": calculate_tiv(final_df), "currency": "EUR", "jobResult": []}
-
+                         "jobId": f"{params['worksheet_id']}_job",
+                         "domain_id": params["domain_id"], "uniqueErrorLines": 0,
+                         "totalErrors": 0, "jobResult": []}
+    #"currency": "EUR"
     for field_code, field_data in target_fields.items():
         print(field_data)
-        field_type = field_data["dataType"]
-        data_check = field_data["dataCheck"]
+        field_type = field_data["type"]
+        data_check = field_data["rules"]
         empty_column = check_empty_df[field_code]
         error_lines_per_field = []
 
@@ -45,7 +46,7 @@ def run_checks(final_df, params, target_fields, metadata=True):
                 continue
 
         if data_check:
-            for check in data_check["rules"]:
+            for check in data_check:
                 checker = CheckerFactory.get_checker(check["type"])
 
                 check_result = checker.run(final_df, field_code, empty_column, check=check, field_type=field_type,
@@ -91,10 +92,6 @@ def check_modifications(final_df, tiv_df, params, target_fields, result_df, modi
             result_df[column].loc[indices] = check_column
 
     update_data_check_metadata(data_check_result, result_df, modified_columns, modifications_result_df, indices)
-    if modifications["is_all"] or (len(modifications["indices"]) > 100):
-        data_check_result["totalTIV"] = calculate_tiv(final_df)
-    else:
-        data_check_result["totalTIV"] = update_tiv(final_df, tiv_df, params["worksheet_id"])
     return data_check_result, result_df
 
 
@@ -125,7 +122,7 @@ def update_data_check_metadata(data_check_result, result_df, modified_columns, m
     data_check_result["uniqueErrorLines"] = len(unique_errors_lines)
     data_check_result["totalErrors"] = total_errors_lines
 
-
+#TODO: change  spesific method and make it generic  by params
 def calculate_tiv(df):
     """Calculates total insured value"""
 

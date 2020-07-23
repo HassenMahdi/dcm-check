@@ -21,7 +21,7 @@ references_namespace = Namespace("Reference Data")
 @check_namespace.route('')
 class CheckingData(Resource):
     get_request_param = {"filename": "The excel file name", "worksheet": "The name of worksheet",
-                         "worksheet_id": "The created worksheet Id", "lob_id": "The lob Id", "lob_name": "The lob name"}
+                         "worksheet_id": "The created worksheet Id", "domain_id": "The domain Id", "domain_name": "The domain name"}
     post_request_body = check_namespace.model("CheckingData", {
         "is_all": fields.Boolean(required=True),
         "indices": fields.List(fields.Integer, required=False),
@@ -35,9 +35,8 @@ class CheckingData(Resource):
         if request.method == 'POST':
             try:
                 params = {param: request.args.get(param) for param in ["filename", "worksheet", "worksheet_id",
-                                                                       "lob_name", "lob_id"]}
+                                                                       "domain_name", "domain_id"]}
                 modifications = request.get_json()
-                params["lob_id"] = int(params["lob_id"])
                 result = start_check_job(params, modifications=modifications)
 
                 return jsonify(result)
@@ -82,19 +81,20 @@ class CheckResults(Resource):
 
 @check_namespace.route('/headers')
 class DataGridHeaders(Resource):
-    get_req_params = {"lob_id": "Lob identifier"}
+    # TODO: change reslut model
+    get_req_params = {"domain_id": "domain identifier"}
 
     @check_namespace.doc("Get the dataGrid headers")
     @check_namespace.doc(params=get_req_params)
     def get(self):
-        lob_id = request.args.get("lob_id")
+        domain_id = request.args.get("domain_id")
         checker_document = CheckerDocument()
 
-        headers = checker_document.get_headers(int(lob_id))
+        headers = checker_document.get_headers(domain_id)
 
         return jsonify(headers)
 
-
+ # TODO: change reslut model to eliminate !!!
 @check_namespace.route('/exposures')
 class Exposures(Resource):
     get_req_params = {"filename": "Excel file name", "worksheet": "Worksheet name", "page": "The page number",
@@ -109,7 +109,7 @@ class Exposures(Resource):
 
         return jsonify(exposures)
 
-
+ # TODO: change reslut model to eliminate !!!
 @check_namespace.route('/delete')
 class ExpouresHandler(Resource):
     get_req_params = {"filename": "Excel file name", "worksheet": "Worksheet name",
@@ -132,7 +132,7 @@ class ExpouresHandler(Resource):
             traceback.print_exc()
             return response_with(resp.SERVER_ERROR_500)
 
-
+ # TODO: change reslut model to eliminate !!!
 @check_namespace.route('/map')
 class Map(Resource):
     get_req_params = {"filename": "Excel file name", "worksheet": "Worksheet name"}
@@ -144,7 +144,7 @@ class Map(Resource):
 
         return read_map_infos(params)
 
-
+ # TODO: change reslut model
 @check_namespace.route('/read-column/')
 class ColumnReader(Resource):
     get_req_params = {"filename": "Excel file name", "worksheet": "Worksheet name", "column": "column code",
