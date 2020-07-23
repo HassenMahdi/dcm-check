@@ -1,8 +1,0 @@
-version: '2.0'
-services:
-  dcm-check:
-    build: .
-    ports:
-    - "5002:5002"
-    volumes:
-    - /scor-data:/scor-data
