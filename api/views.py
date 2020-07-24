@@ -11,6 +11,7 @@ from api.utils.responses import response_with
 from api.controllers import start_check_job, read_exposures, read_results, delete_exposure, read_map_infos, read_column, \
     create_chart
 from database.checker_documents import JobResultDocument, CheckerDocument
+from database.connectors import mongo
 from database.reference_documents import CurrenciesDocument, ConstructionsDocument, OccupancyDocument, GeoScopeDocument
 
 
@@ -42,6 +43,7 @@ class CheckingData(Resource):
                 return jsonify(result)
 
             except Exception:
+
                 traceback.print_exc()
 
                 return response_with(resp.SERVER_ERROR_500)

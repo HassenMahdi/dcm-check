@@ -6,6 +6,7 @@ import time
 import pandas as pd
 
 from api.utils.paginator import Paginator
+from database.connectors import mongo
 from database.modifier_document import ModifierDocument
 from services.cleansing_service import run_checks, check_modifications
 from database.checker_documents import CheckerDocument, JobResultDocument
@@ -64,10 +65,15 @@ def apply_mapping_transformation(df, params, target_fields):
 
 def start_check_job(params, modifications={}):
     """Starts the data check service"""
+    sheet_metadata = mongo.db.logs
 
     checker_document = CheckerDocument()
     #TODO: get target fileds by domain and categories
     target_fields = checker_document.get_all_target_fields(params["domain_id"])
+    sheet_metadata.insert_one(
+        {"_id":params["domain_id"] },
+        {'$set': {"target_fields": target_fields}
+         })
     start = time.time()
     if modifications:
         modifier_document = ModifierDocument()
@@ -102,6 +108,10 @@ def start_check_job(params, modifications={}):
     else:
         start = time.time()
         df = get_imported_data_df(params["filename"], params["worksheet"], nrows=None, skiprows=None)
+        sheet_metadata.insert_one(
+            {"_id": params["domain_id"]},
+            {'$set': {params["filename"]: target_fields}
+             })
         modifier_document = ModifierDocument()
         df = modifier_document.load_import_modifications(df, params["worksheet_id"])
         final_df = apply_mapping_transformation(df, params, target_fields)
