@@ -18,10 +18,10 @@ class DevelopmentConfig(Config):
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = f"mssql+pyodbc:///?odbc_connect={params}"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    UPLOAD_FOLDER = "C:/uploads/"
-    #UPLOAD_FOLDER = "/scor-data/"
-    MONGO_URI = "mongodb://localhost:27017/dcm_db"
-    #MONGO_URI = 'mongodb://dcm-consmos:pUQRAZMYnTiYikWTxjcq7zQch27litMHCSJnHOu9XCssYxBqVRWmMpd8sSnd0G7w66dQ7GMS4UK8iAvOsoBGtw==@dcm-consmos.mongo.cosmos.azure.com:10255/?ssl=true&replicaSet=globaldb&retrywrites=false&maxIdleTimeMS=120000&appName=@dcm-consmos@'
+    #UPLOAD_FOLDER = "C:/uploads/"
+    UPLOAD_FOLDER = "/scor-data/"
+    #MONGO_URI = "mongodb://localhost:27017/dcm_db"
+    MONGO_URI = 'mongodb://dcm-consmos:pUQRAZMYnTiYikWTxjcq7zQch27litMHCSJnHOu9XCssYxBqVRWmMpd8sSnd0G7w66dQ7GMS4UK8iAvOsoBGtw==@dcm-consmos.mongo.cosmos.azure.com:10255/?ssl=true&replicaSet=globaldb&retrywrites=false&maxIdleTimeMS=120000&appName=@dcm-consmos@'
     CORS_HEADERS = 'Content-Type'
 
 
