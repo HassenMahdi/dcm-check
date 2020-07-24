@@ -65,15 +65,13 @@ def apply_mapping_transformation(df, params, target_fields):
 
 def start_check_job(params, modifications={}):
     """Starts the data check service"""
-    logs = mongo.db.logs
+
 
     checker_document = CheckerDocument()
+
     #TODO: get target fileds by domain and categories
     target_fields = checker_document.get_all_target_fields(params["domain_id"])
-    logs.insert_one(
-        {"_id":params["domain_id"] ,
-         "target_fields": target_fields
-         })
+
     start = time.time()
     if modifications:
         modifier_document = ModifierDocument()
@@ -108,10 +106,7 @@ def start_check_job(params, modifications={}):
     else:
         start = time.time()
         df = get_imported_data_df(params["filename"], params["worksheet"], nrows=None, skiprows=None)
-        logs.insert_one(
-            {"_id": params["domain_id"],
-            "files": params["filename"]
-             })
+
         modifier_document = ModifierDocument()
         df = modifier_document.load_import_modifications(df, params["worksheet_id"])
         final_df = apply_mapping_transformation(df, params, target_fields)

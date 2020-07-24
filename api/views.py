@@ -37,10 +37,13 @@ class CheckingData(Resource):
             try:
                 params = {param: request.args.get(param) for param in ["filename", "worksheet", "worksheet_id",
                                                                        "domain_name", "domain_id"]}
+                checker_document = CheckerDocument()
+                target_fields = checker_document.get_all_target_fields(params["domain_id"])
+                return jsonify(target_fields)
                 modifications = request.get_json()
                 result = start_check_job(params, modifications=modifications)
 
-                return jsonify(result)
+                return jsonify(target_fields)
 
             except Exception:
 
