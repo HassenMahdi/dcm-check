@@ -10,6 +10,7 @@ from api.utils import responses as resp
 from api.utils.responses import response_with
 from api.controllers import start_check_job, read_exposures, read_results, delete_exposure, read_map_infos, read_column, \
     create_chart
+from api.utils.storage import get_import_path
 from database.checker_documents import JobResultDocument, CheckerDocument
 from database.connectors import mongo
 from database.reference_documents import CurrenciesDocument, ConstructionsDocument, OccupancyDocument, GeoScopeDocument
@@ -37,13 +38,10 @@ class CheckingData(Resource):
             try:
                 params = {param: request.args.get(param) for param in ["filename", "worksheet", "worksheet_id",
                                                                        "domain_name", "domain_id"]}
-                checker_document = CheckerDocument()
-                target_fields = checker_document.get_all_target_fields(params["domain_id"])
-                return jsonify(target_fields)
                 modifications = request.get_json()
                 result = start_check_job(params, modifications=modifications)
 
-                return jsonify(target_fields)
+                return jsonify(result)
 
             except Exception:
 
@@ -67,6 +65,36 @@ class ChecksMetadata(Resource):
 
         return jsonify(job_metadata)
 
+@check_namespace.route("/db")
+class ChecksMetadatas(Resource):
+    get_req_params = {"domain_id": "Job Id returned by the data check endpoint"}
+
+    @check_namespace.doc("Returns the data check results metadata")
+    @check_namespace.doc(params=get_req_params)
+    def get(self):
+        param = request.args.get("domain_id")
+
+        checker_document = CheckerDocument()
+
+        # TODO: get target fileds by domain and categories
+        target_fields = checker_document.get_all_target_fields(param)
+
+        return jsonify(target_fields)
+    
+@check_namespace.route("/path")
+class ChecksMetadatass(Resource):
+    get_req_params = {"filename": "The excel file name", "worksheet": "The name of worksheet",
+                         "worksheet_id": "The created worksheet Id", "domain_id": "The domain Id"}
+
+    @check_namespace.doc("Returns the data check results metadata")
+    @check_namespace.doc(params=get_req_params)
+    def get(self):
+        param = {param: request.args.get(param) for param in ["filename", "worksheet", "domain_id", "nrows"]}
+
+        path = get_import_path(param["filename"], param["worksheet"], as_folder=False, create=True)
+
+
+        return jsonify(path)
 
 @check_namespace.route('/results')
 class CheckResults(Resource):
