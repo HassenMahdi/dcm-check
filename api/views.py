@@ -80,7 +80,7 @@ class ChecksMetadatas(Resource):
         target_fields = checker_document.get_all_target_fields(param)
 
         return jsonify(target_fields)
-    
+
 @check_namespace.route("/path")
 class ChecksMetadatass(Resource):
     get_req_params = {"filename": "The excel file name", "worksheet": "The name of worksheet",
