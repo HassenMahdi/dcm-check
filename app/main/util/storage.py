@@ -45,7 +45,7 @@ def get_dataframe_from_csv(path, nrows=None, skiprows=None, usecols=None):
     """Creates a dataframe from a csv file"""
 
     df = pd.read_csv(path, engine="c", dtype=str, skipinitialspace=True, skiprows=skiprows, nrows=nrows,
-                     usecols=usecols, na_filter=False,delimiter=";")
+                     usecols=usecols, na_filter=False,delimiter=",")
     return df
 
 

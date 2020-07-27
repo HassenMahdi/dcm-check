@@ -5,7 +5,7 @@ from app.main.service.checks.checker import Checker
 
 
 class FormatChecker(Checker):
-    check_code = "FORMAT"
+    check_code = "FORMAT_CHECK"
     check_name = "format"
     check_message = "The field %s is not correct %s value."
     check_level = "errors"

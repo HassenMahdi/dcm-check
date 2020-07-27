@@ -6,7 +6,7 @@ from app.main.service.checks.checker import Checker
 
 class EmptyChecker(Checker):
 
-    check_code = "NOTEMPTY"
+    check_code = "EMPTY_CHECK"
     check_name = "empty"
     check_message = "The field cannot be empty."
     check_level = "errors"
