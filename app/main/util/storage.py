@@ -41,11 +41,11 @@ def get_results_path(filename, worksheet, as_folder=False, create=True):
     return get_path(RESULTS_FOLDER, filename, worksheet, as_folder, create, extension="csv")
 
 
-def get_dataframe_from_csv(path, nrows=None, skiprows=None, usecols=None, delimeter=','):
+def get_dataframe_from_csv(path, nrows=None, skiprows=None, usecols=None,delimiter=","):
     """Creates a dataframe from a csv file"""
 
     df = pd.read_csv(path, engine="c", dtype=str, skipinitialspace=True, skiprows=skiprows, nrows=nrows,
-                     usecols=usecols, na_filter=False,delimiter=delimeter)
+                     usecols=usecols, na_filter=False,delimiter=delimiter)
     return df
 
 
@@ -53,7 +53,7 @@ def get_check_results_df(filename, worksheet):
     """Creates a dataframe from check result csv file"""
 
     path = get_results_path(filename, worksheet, as_folder=False, create=True)
-    return get_dataframe_from_csv(path,delimeter=';')
+    return get_dataframe_from_csv(path,delimiter=";")
 
 
 def get_mapped_df(filename, worksheet, nrows=None, skiprows=None, usecols=None):

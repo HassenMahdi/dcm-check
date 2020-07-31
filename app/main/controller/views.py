@@ -6,7 +6,6 @@ import traceback
 from flask import request, jsonify
 from flask_restx import Resource, Namespace, fields
 
-from app.main.service.filter_service import update_table
 from  app.main.util import responses as resp
 from app.main.util.responses import response_with
 from app.main.service.controllers import start_check_job, read_exposures, read_results, read_column
@@ -73,10 +72,7 @@ class ChecksMetadatas(Resource):
         param = request.args.get("domain_id")
 
         checker_document = CheckerDocument()
-        #update_table(1,10,[{'column_id': "continent", 'direction': "asc"}],"{Policy Number} contains '21' && {country} contains A ")
-        filter="{AWCV} contains '21' "
-        sort= [{'column_id': "AWCV", 'direction': "asc"}]
-        df= update_table(100,10,sort,filter)
+
         # TODO: get target fileds by domain and categories
         target_fields = checker_document.get_all_target_fields(param)
 
@@ -108,7 +104,7 @@ class CheckResults(Resource):
         params = {param: request.args.get(param) for param in ["filename", "worksheet", "page", "nrows"]}
         params["nrows"] = 50 if params["nrows"] == "None" else int(params["nrows"])
 
-        check_results = read_results(params,None)
+        check_results = read_results(params)
 
         return jsonify(check_results)
 
@@ -143,11 +139,6 @@ class Exposures(Resource):
 
         return jsonify(exposures)
 
-
-
-
-
-
 @api.route('/read-column/')
 class ColumnReader(Resource):
     get_req_params = {"filename": "Excel file name", "worksheet": "Worksheet name", "column": "column code",
@@ -159,37 +150,7 @@ class ColumnReader(Resource):
         params = {param: request.args.get(param) for param in ["filename", "worksheet", "column", "unique"]}
 
         return read_column(params)
-
-
-
-@api.route('/result')
-class CheckResults(Resource):
-    get_req_params = {"filename": "Excel file name", "worksheet": "Worksheet name",
-                      "page": "The page number", "nrows": "Number of rows to preview"}
-    post_request_body = api.model("CheckingData", {
-        "filter": fields.String(description='filter string expression', required=False),
-        "sort": fields.List(fields.Raw, required=False),
-        # "content": fields.Raw(required=True),
-    })
-
-    @api.doc("Get paginated check results")
-    @api.doc(params=get_req_params)
-    @api.expect(post_request_body)
-    def post(self):
-        if request.method == 'POST':
-            try:
-                params = {param: request.args.get(param) for param in ["filename", "worksheet", "page", "nrows"]}
-                params["nrows"] = 50 if params["nrows"] == "None" else int(params["nrows"])
-                filter_sort = request.get_json()
-                check_results = read_results(params,filter_sort)
-
-                return jsonify(check_results)
-            except Exception:
-                traceback.print_exc()
-            return response_with(resp.SERVER_ERROR_500)
-
-
-
+        
 @api.route('/data')
 class Exposures(Resource):
     get_request_param ={"filename": "Excel file name", "worksheet": "Worksheet name", "page": "The page number",
@@ -220,6 +181,13 @@ class Exposures(Resource):
                 traceback.print_exc()
 
             return response_with(resp.SERVER_ERROR_500)
+
+
+
+
+
+
+
 
 
 
