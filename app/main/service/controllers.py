@@ -256,6 +256,7 @@ def read_result(params,data):
         return check_results
 
 def to_float(column):
+    
     """Converts a column of type np numeric to float"""
     return float(column)
 
