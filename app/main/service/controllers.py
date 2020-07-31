@@ -140,7 +140,7 @@ def read_exposures(request, params,filter_sort):
         filter = filter_sort["filter"]
 
 
-    data = update_table(path,params["page"], params["nrows"], sort, filter,delimeter=';')
+    data = update_table(path,params["page"], params["nrows"], sort, filter)
     headers = paginator.load_headers(path)
     domain_id = params["domain_id"]
     lables=checker_document.get_target_fields(domain_id, query={"name": {"$in": headers}})
