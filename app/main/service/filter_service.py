@@ -43,7 +43,7 @@ def split_filter_part(filter_part):
 
 
 def update_table(path,page_current, page_size, sort_by, filter):
-    df= pd.read_csv(path, engine="c", dtype=str, skipinitialspace=True, na_filter=False, delimiter=",")
+    df= pd.read_csv(path, engine="c", dtype=str, skipinitialspace=True, na_filter=False, delimiter=";")
     filtering_expressions = filter.split(' && ')
     dff = df
     for filter_part in filtering_expressions:
