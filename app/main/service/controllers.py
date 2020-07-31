@@ -5,6 +5,7 @@ import time
 
 import pandas as pd
 
+from app.main.service.filter_service import update_table
 from app.main.util.paginator import Paginator
 from app.db.Models.modifier_document import ModifierDocument
 from app.main.service.cleansing_service import run_checks, check_modifications
