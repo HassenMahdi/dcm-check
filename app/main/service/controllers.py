@@ -231,7 +231,7 @@ def read_result(params,data):
     try:
         path = get_results_path(params["filename"], params["worksheet"], as_folder=False, create=True)
 
-        dff =  df= pd.read_csv(path, engine="c", dtype=str, skipinitialspace=True, na_filter=False, delimiter=";")
+        dff = pd.read_csv(path, engine="c", dtype=str, skipinitialspace=True, na_filter=False, delimiter=";")
 
         df= dff.iloc[data.index]
 
