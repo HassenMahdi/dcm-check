@@ -139,17 +139,17 @@ def read_exposures(request, params,filter_sort):
         sort =filter_sort["sort"]
         filter = filter_sort["filter"]
 
-    print("read data")
+
     data = update_table(path,params["page"], params["nrows"], sort, filter)
-    print("read headers")
+    print("read data  : ", data)
     headers = paginator.load_headers(path)
-    print("read domain")
+    print("read headers   :", headers)
     domain_id = params["domain_id"]
     lables=checker_document.get_target_fields(domain_id, query={"name": {"$in": headers}})
     lables = list(map(lambda x: {"field":x["name"], "headerName":x["label"]},lables))
     print("read results")
     check_results = read_result(params,data )
-    print("read exposures")
+    print("read exposures  : " , check_results)
     exposures = paginator.get_paginated_response(data,lables,check_results)
 
 

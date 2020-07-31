@@ -112,16 +112,13 @@ class Paginator:
 
         return exposures
 
-    def get_paginated_response(self, data,labels):
+    def get_paginated_response(self, data,labels,check_results):
         paginated_response = {
-            "_links": self.links,
-            "current_page": self.page,
-            "first_page": self.DEFAULT_PAGE,
-            "last_page": self.last_page,
-            "total": self.total,
-            "count": len(data),
-            "headers":labels,
 
+            "total": len(data),
+            "count": len(data),
+            "headers": labels,
+            "results": check_results,
             "data": data.to_dict(orient='records')
         }
 
