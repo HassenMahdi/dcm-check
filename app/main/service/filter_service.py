@@ -43,7 +43,7 @@ def split_filter_part(filter_part):
 
 
 def update_table(path,page_current, page_size, sort_by, filter):
-    df = get_dataframe_from_csv(path, delimeter=',')
+    df= pd.read_csv(path, engine="c", dtype=str, skipinitialspace=True, na_filter=False, delimiter=",")
     filtering_expressions = filter.split(' && ')
     dff = df
     for filter_part in filtering_expressions:
@@ -71,4 +71,4 @@ def update_table(path,page_current, page_size, sort_by, filter):
 
     page = int(page_current)
     size = int(page_size)
-    return dff.iloc[page * size: (page + 1) * size] #.to_dict('records')
+    return dff.iloc[page * size: (page + 1) * size]
