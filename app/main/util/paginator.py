@@ -117,18 +117,11 @@ class Paginator:
 
             "total": len(data),
             "count": len(data),
-            "headers": labels,
-            "results": check_results,
+            "headers":labels,
+            "results":check_results,
             "data": data.to_dict(orient='records')
         }
 
-        exposures = paginated_response["data"]
-        if isinstance(exposures, dict) and "index" in exposures:
-            del exposures["index"]
 
-        end = self.limit + self.offset
-        if end > self.total:
-            end = self.total
-        paginated_response["index"] = list(range(self.offset, end))
 
         return paginated_response
