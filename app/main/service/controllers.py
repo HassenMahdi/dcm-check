@@ -9,7 +9,7 @@ from app.main.service.filter_service import update_table
 from app.main.util.paginator import Paginator
 from app.db.Models.modifier_document import ModifierDocument
 from app.main.service.cleansing_service import run_checks, check_modifications
-from app.db.Models.checker_documents import CheckerDocument, JobResultDocument
+from  app.db.Models.checker_documents import CheckerDocument, JobResultDocument
 from app.main.util.storage import get_mapped_df, get_imported_data_df, save_mapped_df, save_check_results_df, \
     get_check_results_df, get_mapping_path, get_results_path, get_dataframe_from_csv
 from app.main.service.dataframe import apply_check_modifications, calculate_field
@@ -25,14 +25,14 @@ def apply_mapping_transformation(df, params, target_fields):
     """Apply the mapping transformation in case of multiple source mapping"""
 
     checker_document = CheckerDocument()
-    target_fields_names = [key for key in target_fields.keys()]
+    target_fields_names=[key for key in target_fields.keys()]
     transformed_df = pd.DataFrame(columns=target_fields_names)
     default_values = checker_document.get_default_values(params["domain_id"])
     mappings = checker_document.get_mappings(params["worksheet_id"], params["domain_id"])
 
     for target, source in mappings.items():
         data_type = target_fields[target]["type"]
-        remove_digits = target_fields[target].get("skipDecimalDigits", None)
+        remove_digits = target_fields[target].get("skipDecimalDigits",None)
         if len(source) > 1:
             if data_type == "string":
                 transformed_df[target] = df[source[0]].str.cat(df[source[1:]].astype(str), sep=" ")
@@ -50,9 +50,9 @@ def apply_mapping_transformation(df, params, target_fields):
     else:
         transformed_df["pd_split"] = "Yes"
     condition = [{"property": "pd_split", "value": transformed_df.loc[0]["pd_split"]}]
-    # formulas = checker_document.get_calculated_fields_formula(params["lob_id"], condition, mappings)
+    #formulas = checker_document.get_calculated_fields_formula(params["lob_id"], condition, mappings)
 
-    # for field_code, formula in formulas.items():
+    #for field_code, formula in formulas.items():
     #   transformed_df[field_code] = calculate_field(transformed_df, formula, mappings, formulas)
 
     if default_values:
@@ -65,9 +65,10 @@ def apply_mapping_transformation(df, params, target_fields):
 def start_check_job(params, modifications={}):
     """Starts the data check service"""
 
+
     checker_document = CheckerDocument()
 
-    # TODO: get target fileds by domain and categories
+    #TODO: get target fileds by domain and categories
     target_fields = checker_document.get_all_target_fields(params["domain_id"])
 
     start = time.time()
@@ -86,7 +87,7 @@ def start_check_job(params, modifications={}):
         else:
             nrows = len(modifications["indices"])
             skiprows = list(set(range(1, max(modifications["indices"]) + 1)) -
-                            set([index + 1 for index in modifications["indices"]]))
+                       set([index +1 for index in modifications["indices"]]))
             mapped_df = get_mapped_df(params["filename"], params["worksheet"], skiprows=skiprows, nrows=nrows)
             mapped_df.index = modifications["indices"]
             modifier_document.save_check_modifications(params["worksheet_id"], modifications, mapped_df)
@@ -122,7 +123,7 @@ def start_check_job(params, modifications={}):
         return job_result_document.save_check_job(data_check_result)
 
 
-def read_exposures(request, params, filter_sort):
+def read_exposures(request, params,filter_sort):
     """Reads the mapped data csv file"""
     sort = []
     filter = ""
@@ -131,25 +132,27 @@ def read_exposures(request, params, filter_sort):
     base_url = request.base_url
     paginator = Paginator(base_url=base_url, query_dict=params, page=int(params["page"]), limit=int(params["nrows"]))
     path = get_mapping_path(params["filename"], params["worksheet"])
-    # TODO: change data format
-    # data = paginator.load_paginated_dataframe(path, 10, params["worksheet_id"])
+    #TODO: change data format
+    #data = paginator.load_paginated_dataframe(path, 10, params["worksheet_id"])
 
     if filter_sort:
-        sort = filter_sort["sort"]
+        sort =filter_sort["sort"]
         filter = filter_sort["filter"]
 
-    data = update_table(path, params["page"], params["nrows"], sort, filter, delimeter=';')
+
+    data = update_table(path,params["page"], params["nrows"], sort, filter,delimeter=';')
     headers = paginator.load_headers(path)
     domain_id = params["domain_id"]
-    lables = checker_document.get_target_fields(domain_id, query={"name": {"$in": headers}})
-    lables = list(map(lambda x: {"field": x["name"], "headerName": x["label"]}, lables))
-    check_results = read_results(params, data)
-    exposures = paginator.get_paginated_response(data, lables, check_results)
+    lables=checker_document.get_target_fields(domain_id, query={"name": {"$in": headers}})
+    lables = list(map(lambda x: {"field":x["name"], "headerName":x["label"]},lables))
+    check_results = read_results(params,data )
+    exposures = paginator.get_paginated_response(data,lables,check_results)
+
 
     return exposures
 
 
-def read_results(params, data):
+def read_results(params,data):
     """Reads the data check result file"""
     sort = []
     filter = ""
@@ -160,7 +163,7 @@ def read_results(params, data):
 
         dff = get_dataframe_from_csv(path, delimeter=";")
 
-        df = dff.iloc[data.index]
+        df= dff.iloc[data.index]
 
         check_results["count"] = df.shape[0]
         result = {}
@@ -176,6 +179,7 @@ def read_results(params, data):
                 target = target.setdefault(field_code, {})
                 target = target.setdefault(error_type, [])
                 target.append(check_type)
+
 
         return result
     except pd.errors.EmptyDataError:
@@ -202,10 +206,12 @@ def delete_exposure(params, modifications):
 
         modifier_document.delete_check_modification(params["worksheet_id"], modifications["indices"])
         modifier_document.update_indices(params["worksheet_id"], modifications["indices"])
-
+        
     checker_document.delete_metadata(params, modifications, mapped_df, result_df)
     save_mapped_df(mapped_df, params["filename"], params["worksheet"])
     save_check_results_df(result_df, params["filename"], params["worksheet"])
+
+
 
 
 def read_column(params):
@@ -222,7 +228,6 @@ def read_column(params):
 def to_float(column):
     """Converts a column of type np numeric to float"""
     return float(column)
-
 
 def sort(df):
     return df.sort_values(by=['First Column', 'Second Column', ...], inplace=True)

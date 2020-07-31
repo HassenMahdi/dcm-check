@@ -7,21 +7,21 @@ from flask import request, jsonify
 from flask_restx import Resource, Namespace, fields
 
 from app.main.service.filter_service import update_table
-from app.main.util import responses as resp
+from  app.main.util import responses as resp
 from app.main.util.responses import response_with
 from app.main.service.controllers import start_check_job, read_exposures, read_results, read_column
 from app.main.util.storage import get_import_path
-
+    
 from app.db.Models.checker_documents import JobResultDocument, CheckerDocument
 
 api = Namespace('data check', description='checks')
 
 
+
 @api.route('')
 class CheckingData(Resource):
     get_request_param = {"filename": "The excel file name", "worksheet": "The name of worksheet",
-                         "worksheet_id": "The created worksheet Id", "domain_id": "The domain Id",
-                         "domain_name": "The domain name"}
+                         "worksheet_id": "The created worksheet Id", "domain_id": "The domain Id", "domain_name": "The domain name"}
     post_request_body = api.model("CheckingData", {
         "is_all": fields.Boolean(required=True),
         "indices": fields.List(fields.Integer, required=False),
@@ -63,7 +63,6 @@ class ChecksMetadata(Resource):
 
         return jsonify(job_metadata)
 
-
 @api.route("/db")
 class ChecksMetadatas(Resource):
     get_req_params = {"domain_id": "Job Id returned by the data check endpoint"}
@@ -74,20 +73,19 @@ class ChecksMetadatas(Resource):
         param = request.args.get("domain_id")
 
         checker_document = CheckerDocument()
-        # update_table(1,10,[{'column_id': "continent", 'direction': "asc"}],"{Policy Number} contains '21' && {country} contains A ")
-        filter = "{AWCV} contains '21' "
-        sort = [{'column_id': "AWCV", 'direction': "asc"}]
-        df = update_table(100, 10, sort, filter)
+        #update_table(1,10,[{'column_id': "continent", 'direction': "asc"}],"{Policy Number} contains '21' && {country} contains A ")
+        filter="{AWCV} contains '21' "
+        sort= [{'column_id': "AWCV", 'direction': "asc"}]
+        df= update_table(100,10,sort,filter)
         # TODO: get target fileds by domain and categories
         target_fields = checker_document.get_all_target_fields(param)
 
         return jsonify(target_fields)
 
-
 @api.route("/path")
 class ChecksMetadatass(Resource):
     get_req_params = {"filename": "The excel file name", "worksheet": "The name of worksheet",
-                      "worksheet_id": "The created worksheet Id", "domain_id": "The domain Id"}
+                         "worksheet_id": "The created worksheet Id", "domain_id": "The domain Id"}
 
     @api.doc("Returns the data check results metadata")
     @api.doc(params=get_req_params)
@@ -96,8 +94,8 @@ class ChecksMetadatass(Resource):
 
         path = get_import_path(param["filename"], param["worksheet"], as_folder=False, create=True)
 
-        return jsonify(path)
 
+        return jsonify(path)
 
 @api.route('/results')
 class CheckResults(Resource):
@@ -110,7 +108,7 @@ class CheckResults(Resource):
         params = {param: request.args.get(param) for param in ["filename", "worksheet", "page", "nrows"]}
         params["nrows"] = 50 if params["nrows"] == "None" else int(params["nrows"])
 
-        check_results = read_results(params, None)
+        check_results = read_results(params,None)
 
         return jsonify(check_results)
 
@@ -130,23 +128,24 @@ class DataGridHeaders(Resource):
 
         return jsonify(headers)
 
-
-# TODO: change reslut model to eliminate !!!
+ # TODO: change reslut model to eliminate !!!
 @api.route('/exposures')
 class Exposures(Resource):
     get_req_params = {"filename": "Excel file name", "worksheet": "Worksheet name", "page": "The page number",
-                      "worksheet_id": "The worksheet created Id", "nrows": "Number of rows to preview",
-                      "domain_id": "domain_id"}
+                      "worksheet_id": "The worksheet created Id", "nrows": "Number of rows to preview","domain_id":"domain_id"}
 
     @api.doc("Get paginated exposures")
     @api.doc(params=get_req_params)
     def get(self):
-        params = {param: request.args.get(param) for param in
-                  ["filename", "domain_id", "worksheet", "worksheet_id", "page",
-                   "nrows"]}
-        exposures = read_exposures(request, params, None)
+        params = {param: request.args.get(param) for param in ["filename","domain_id", "worksheet", "worksheet_id", "page",
+                                                               "nrows"]}
+        exposures = read_exposures(request, params,None)
 
         return jsonify(exposures)
+
+
+
+
 
 
 @api.route('/read-column/')
@@ -160,6 +159,7 @@ class ColumnReader(Resource):
         params = {param: request.args.get(param) for param in ["filename", "worksheet", "column", "unique"]}
 
         return read_column(params)
+
 
 
 @api.route('/result')
@@ -181,7 +181,7 @@ class CheckResults(Resource):
                 params = {param: request.args.get(param) for param in ["filename", "worksheet", "page", "nrows"]}
                 params["nrows"] = 50 if params["nrows"] == "None" else int(params["nrows"])
                 filter_sort = request.get_json()
-                check_results = read_results(params, filter_sort)
+                check_results = read_results(params,filter_sort)
 
                 return jsonify(check_results)
             except Exception:
@@ -189,18 +189,17 @@ class CheckResults(Resource):
             return response_with(resp.SERVER_ERROR_500)
 
 
+
 @api.route('/data')
 class Exposures(Resource):
-    get_request_param = {"filename": "Excel file name", "worksheet": "Worksheet name", "page": "The page number",
-                         "worksheet_id": "The worksheet created Id", "nrows": "Number of rows to preview",
-                         "domain_id": "domain_id"}
+    get_request_param ={"filename": "Excel file name", "worksheet": "Worksheet name", "page": "The page number",
+                      "worksheet_id": "The worksheet created Id", "nrows": "Number of rows to preview","domain_id":"domain_id"}
 
     post_request_body = api.model("CheckingData", {
-        "filter": fields.String(description='filter string expression', required=False),
+        "filter": fields.String(description='filter string expression',required=False),
         "sort": fields.List(fields.Raw, required=False),
-        # "content": fields.Raw(required=True),
+        #"content": fields.Raw(required=True),
     })
-
     @api.doc("Get paginated data")
     @api.doc(params=get_request_param)
     @api.expect(post_request_body)
@@ -212,7 +211,7 @@ class Exposures(Resource):
                            "nrows"]}
                 filter_sort = request.get_json()
 
-                exposures = read_exposures(request, params, filter_sort)
+                exposures = read_exposures(request, params,filter_sort)
 
                 return jsonify(exposures)
 

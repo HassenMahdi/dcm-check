@@ -42,8 +42,8 @@ def split_filter_part(filter_part):
 
 
 
-def update_table(path,page_current, page_size, sort_by, filter):
-    df = get_dataframe_from_csv(path, delimeter=',')
+def update_table(path,page_current, page_size, sort_by, filter,delimeter=','):
+    df = get_dataframe_from_csv(path, delimeter=delimeter)
     filtering_expressions = filter.split(' && ')
     dff = df
     for filter_part in filtering_expressions:
