@@ -135,7 +135,7 @@ class Exposures(Resource):
     def get(self):
         params = {param: request.args.get(param) for param in ["filename","domain_id", "worksheet", "worksheet_id", "page",
                                                                "nrows"]}
-        exposures = read_exposures(request, params)
+        exposures = read_exposures(request, params,None)
 
         return jsonify(exposures)
 
@@ -150,7 +150,37 @@ class ColumnReader(Resource):
         params = {param: request.args.get(param) for param in ["filename", "worksheet", "column", "unique"]}
 
         return read_column(params)
+        
+@api.route('/data')
+class Exposures(Resource):
+    get_request_param ={"filename": "Excel file name", "worksheet": "Worksheet name", "page": "The page number",
+                      "worksheet_id": "The worksheet created Id", "nrows": "Number of rows to preview","domain_id":"domain_id"}
 
+    post_request_body = api.model("CheckingData", {
+        "filter": fields.String(description='filter string expression',required=False),
+        "sort": fields.List(fields.Raw, required=False),
+        #"content": fields.Raw(required=True),
+    })
+    @api.doc("Get paginated data")
+    @api.doc(params=get_request_param)
+    @api.expect(post_request_body)
+    def post(self):
+        if request.method == 'POST':
+            try:
+                params = {param: request.args.get(param) for param in
+                          ["filename", "domain_id", "worksheet", "worksheet_id", "page",
+                           "nrows"]}
+                filter_sort = request.get_json()
+
+                exposures = read_exposures(request, params,filter_sort)
+
+                return jsonify(exposures)
+
+            except Exception:
+
+                traceback.print_exc()
+
+            return response_with(resp.SERVER_ERROR_500)
 
 
 

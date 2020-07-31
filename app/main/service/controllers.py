@@ -122,21 +122,30 @@ def start_check_job(params, modifications={}):
         return job_result_document.save_check_job(data_check_result)
 
 
-def read_exposures(request, params):
+def read_exposures(request, params,filter_sort):
     """Reads the mapped data csv file"""
-
+    sort = []
+    filter = ""
     checker_document = CheckerDocument()
     worksheet = checker_document.get_worksheet_metadata(params["worksheet_id"])
     base_url = request.base_url
     paginator = Paginator(base_url=base_url, query_dict=params, page=int(params["page"]), limit=int(params["nrows"]))
     path = get_mapping_path(params["filename"], params["worksheet"])
-    data = paginator.load_paginated_dataframe(path, 10, params["worksheet_id"])
+    #TODO: change data format
+    #data = paginator.load_paginated_dataframe(path, 10, params["worksheet_id"])
 
+    if filter_sort:
+        sort =filter_sort["sort"]
+        filter = filter_sort["filter"]
+
+
+    data = update_table(path,params["page"], params["nrows"], sort, filter,delimeter=';')
     headers = paginator.load_headers(path)
     domain_id = params["domain_id"]
     lables=checker_document.get_target_fields(domain_id, query={"name": {"$in": headers}})
     lables = list(map(lambda x: {"field":x["name"], "headerName":x["label"]},lables))
-    exposures = paginator.get_paginated_response(data,lables)
+    check_results = read_result(params,data )
+    exposures = paginator.get_paginated_response(data,lables,check_results)
 
 
     return exposures
@@ -212,6 +221,38 @@ def read_column(params):
         column_data = mapped_df[params["column"]].tolist()
     return {"column": column_data}
 
+def read_result(params,data):
+    """Reads the data check result file"""
+    sort = []
+    filter = ""
+    check_results = {"count": 0, "errors": {}, "warnings": {}}
+
+    try:
+        path = get_results_path(params["filename"], params["worksheet"], as_folder=False, create=True)
+
+        dff = get_dataframe_from_csv(path, delimeter=";")
+
+        df= dff.iloc[data.index]
+
+        check_results["count"] = df.shape[0]
+        result = {}
+        for column in df.columns.values:
+            check_type, field_code, error_type = eval(column)
+            check_results[error_type][field_code] = {}
+            check_results[error_type][field_code][check_type] = df.index[df[column] == 'True'].tolist()
+
+            error = {}
+            indexes = df.index[df[column] == 'True']
+            for index in indexes:
+                target = result.setdefault(index, {})
+                target = target.setdefault(field_code, {})
+                target = target.setdefault(error_type, [])
+                target.append(check_type)
+
+
+        return result
+    except pd.errors.EmptyDataError:
+        return check_results
 
 def to_float(column):
     """Converts a column of type np numeric to float"""
