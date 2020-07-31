@@ -139,13 +139,17 @@ def read_exposures(request, params,filter_sort):
         sort =filter_sort["sort"]
         filter = filter_sort["filter"]
 
-
+    print("read data")
     data = update_table(path,params["page"], params["nrows"], sort, filter)
+    print("read headers")
     headers = paginator.load_headers(path)
+    print("read domain")
     domain_id = params["domain_id"]
     lables=checker_document.get_target_fields(domain_id, query={"name": {"$in": headers}})
     lables = list(map(lambda x: {"field":x["name"], "headerName":x["label"]},lables))
+    print("read results")
     check_results = read_result(params,data )
+    print("read exposures")
     exposures = paginator.get_paginated_response(data,lables,check_results)
 
 
@@ -256,7 +260,7 @@ def read_result(params,data):
         return check_results
 
 def to_float(column):
-    
+
     """Converts a column of type np numeric to float"""
     return float(column)
 
