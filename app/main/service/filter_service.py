@@ -54,8 +54,10 @@ def update_table(path,page_current, page_size, sort_by, filter):
     for filter_part in filtering_expressions:
         col_name, operator, filter_value = split_filter_part(filter_part)
 
-        if operator in ('eq', 'ne', 'lt', 'le', 'gt', 'ge'):
+        if operator in ('lt', 'le', 'gt', 'ge'):
             # these operators match pandas series operator method names
+            dff = dff.loc[getattr(dff[col_name].astype(float), operator)(float(filter_value))]
+        elif operator in ('eq', 'ne'):
             dff = dff.loc[getattr(dff[col_name], operator)(filter_value)]
         elif operator == 'contains':
             dff = dff.loc[dff[col_name].str.contains(filter_value)]

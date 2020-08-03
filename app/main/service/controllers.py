@@ -45,6 +45,8 @@ def apply_mapping_transformation(df, params, target_fields):
             del default_values[target]
         if remove_digits:
             transformed_df[target] = transformed_df[target].astype(str).apply(trim_fraction)
+        if data_type in ["double", "int"]:
+            transformed_df[target] = df[source].apply(pd.to_numeric, errors='coerce')
     if "pd_value" in mappings:
         transformed_df["pd_split"] = "No"
     else:
