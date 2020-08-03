@@ -250,7 +250,7 @@ def read_result(params,data):
             indexes = df.index[df[column] == 'True']
             count = 0
             for index in indexes:
-                target = result.setdefault(index, {})
+                target = result.setdefault(count, {})
                 target = target.setdefault(field_code, {})
                 target = target.setdefault(error_type, [])
                 target.append(check_type)
