@@ -4,16 +4,21 @@ from app.main.util.storage import get_dataframe_from_csv
 
 
 PAGE_SIZE = 5
+#startswith ,endswith ,Not equal ,Equals,Not contains
+#Equals, Not equal, Less than, Less than or equals, Greater than, Greater than or equals, In range
+#Equals , Greater than, Less than , Not equal , In range
 
 
-
-operators = [['ge ', '>='],
-             ['le ', '<='],
-             ['lt ', '<'],
-             ['gt ', '>'],
-             ['ne ', '!='],
-             ['eq ', '='],
+operators = [['ge ', 'Greater than or equals'],
+             ['le ', 'Less than or equals'],
+             ['lt ', 'Less than'],
+             ['gt ', 'Greater than'],
+             ['ne ', 'Not equal'],
+             ['eq ', 'Equals'],
              ['contains '],
+            # ['In range '],
+             ['Starts with '],
+             ['Ends with '],
              ['datestartswith ']]
 
 
@@ -54,6 +59,12 @@ def update_table(path,page_current, page_size, sort_by, filter):
             dff = dff.loc[getattr(dff[col_name], operator)(filter_value)]
         elif operator == 'contains':
             dff = dff.loc[dff[col_name].str.contains(filter_value)]
+        elif operator == 'Starts with':
+            dff = dff.loc[dff[col_name].str.startswith(filter_value)]
+        elif operator == 'Ends with':
+            dff = dff.loc[dff[col_name].str.endswith(filter_value)]
+      #  elif operator == 'In range':
+       #     dff = dff.loc[dff[col_name].str.endswith(filter_value)]
         elif operator == 'datestartswith':
             # this is a simplification of the front-end filtering logic,
             # only works with complete fields in standard format
