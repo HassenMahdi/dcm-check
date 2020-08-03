@@ -248,11 +248,13 @@ def read_result(params,data):
 
             error = {}
             indexes = df.index[df[column] == 'True']
+            count = 0
             for index in indexes:
                 target = result.setdefault(index, {})
                 target = target.setdefault(field_code, {})
                 target = target.setdefault(error_type, [])
                 target.append(check_type)
+                count = count + 1
 
 
         return result
