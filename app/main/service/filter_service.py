@@ -9,16 +9,16 @@ PAGE_SIZE = 5
 #Equals , Greater than, Less than , Not equal , In range
 
 
-operators = [['ge ', 'Greater than or equals'],
-             ['le ', 'Less than or equals'],
-             ['lt ', 'Less than'],
-             ['gt ', 'Greater than'],
-             ['ne ', 'Not equal'],
-             ['eq ', 'Equals'],
+operators = [['ge ', 'greaterThanOrEqual'],
+             ['le ', 'lessThanOrEqual'],
+             ['lt ', 'lessThan'],
+             ['gt ', 'greaterThan'],
+             ['ne ', 'notEqual'],
+             ['eq ', 'equals'],
              ['contains '],
             # ['In range '],
-             ['Starts with '],
-             ['Ends with '],
+             ['startsWith '],
+             ['endsWith '],
              ['datestartswith ']]
 
 
