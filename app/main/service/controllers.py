@@ -146,7 +146,7 @@ def read_exposures(request, params,filter_sort):
     print("read headers   :", headers)
     domain_id = params["domain_id"]
     lables=checker_document.get_target_fields(domain_id, query={"name": {"$in": headers}})
-    lables = list(map(lambda x: {"field":x["name"], "headerName":x["label"]},lables))
+    lables = list(map(lambda x: {"field":x["name"], "headerName":x["label"],"type":x["type"]},lables))
     print("read results")
     check_results = read_result(params,data )
     print("read exposures  : " , check_results)
