@@ -1,5 +1,6 @@
 import pandas as pd
 
+from app.main.service.modification_service import ModifierService
 from app.main.util.storage import get_dataframe_from_csv
 
 
@@ -47,10 +48,11 @@ def split_filter_part(filter_part):
 
 
 
-def update_table(path,page_current, page_size, sort_by, filter):
+def update_table(params,path,page_current, page_size, sort_by, filter):
+    modifier = ModifierService()
     df= pd.read_csv(path, engine="c", dtype=str, skipinitialspace=True, na_filter=False, delimiter=";")
     filtering_expressions = filter.split(' && ')
-    dff = df
+    dff = modifier.applys(params["worksheet"], params["domain_id"], [], df)
     for filter_part in filtering_expressions:
         col_name, operator, filter_value = split_filter_part(filter_part)
 

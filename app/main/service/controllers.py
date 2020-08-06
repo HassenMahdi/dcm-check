@@ -6,6 +6,7 @@ import time
 import pandas as pd
 
 from app.main.service.filter_service import update_table
+from app.main.service.modification_service import ModifierService
 from app.main.util.paginator import Paginator
 from app.db.Models.modifier_document import ModifierDocument
 from app.main.service.cleansing_service import run_checks, check_modifications
@@ -66,36 +67,30 @@ def apply_mapping_transformation(df, params, target_fields):
 
 def start_check_job(params, modifications={}):
     """Starts the data check service"""
-
-
     checker_document = CheckerDocument()
-
+    modifier =ModifierService()
     #TODO: get target fileds by domain and categories
     target_fields = checker_document.get_all_target_fields(params["domain_id"])
 
     start = time.time()
-    if modifications:
-        modifier_document = ModifierDocument()
-        # TODO: get target fileds by domain and categories
+    if modifications and len(modifications.get("columns",[]))>0:
+        rows_indexes=set()
+        modifs = modifier.save(params["worksheet"], params["domain_id"], modifications)
         result_df = get_check_results_df(params["filename"], params["worksheet"])
-        if modifications["is_all"] or (len(modifications["indices"]) > 100):
-            mapped_df = get_mapped_df(params["filename"], params["worksheet"])
-            mapped_df = modifier_document.load_check_modifications(mapped_df, params["worksheet_id"], modifications)
-            final_df = apply_check_modifications(mapped_df, modifications)
-            modifier_document.delete_check_modification(params["worksheet_id"])
-            data_check_result, result_df = check_modifications(final_df, mapped_df, params, target_fields, result_df,
-                                                               modifications)
-            save_mapped_df(mapped_df, params["filename"], params["worksheet"])
-        else:
-            nrows = len(modifications["indices"])
-            skiprows = list(set(range(1, max(modifications["indices"]) + 1)) -
-                       set([index +1 for index in modifications["indices"]]))
-            mapped_df = get_mapped_df(params["filename"], params["worksheet"], skiprows=skiprows, nrows=nrows)
-            mapped_df.index = modifications["indices"]
-            modifier_document.save_check_modifications(params["worksheet_id"], modifications, mapped_df)
-            final_df = modifier_document.load_check_modifications(mapped_df, params["worksheet_id"], modifications)
-            data_check_result, result_df = check_modifications(final_df, "tiv_df", params, target_fields, result_df,
-                                                               modifications)
+        columns=modifs.columns.keys()
+        for key in columns:
+            rows_indexes.update(set(map(lambda x:int(x) , modifs.columns[key])))
+        rows_indexes=list(rows_indexes)
+        rows_indexes.sort()
+        nrows = len(rows_indexes)
+        skiprows =list(set(range(1, max(rows_indexes) + 1)) -
+                       set([index +1 for index in rows_indexes]))
+        mapped_df = get_mapped_df(params["filename"], params["worksheet"], skiprows=skiprows, nrows=nrows)
+        mapped_df.index =rows_indexes
+        #Todo: load only modif column and apply only for n rows
+        final_df = modifier.apply(modifs,mapped_df)
+        data_check_result, result_df = check_modifications(final_df, rows_indexes, params, target_fields, result_df,
+                                                               modifs)
         save_check_results_df(result_df, params["filename"], params["worksheet"])
         print("end checks")
         print(time.time() - start)
@@ -103,7 +98,6 @@ def start_check_job(params, modifications={}):
         job_result_document = JobResultDocument()
 
         return job_result_document.save_check_job(data_check_result)
-
     else:
         start = time.time()
         df = get_imported_data_df(params["filename"], params["worksheet"], nrows=None, skiprows=None)
@@ -127,31 +121,25 @@ def start_check_job(params, modifications={}):
 
 def read_exposures(request, params,filter_sort):
     """Reads the mapped data csv file"""
+
     sort = []
     filter = ""
     checker_document = CheckerDocument()
-    worksheet = checker_document.get_worksheet_metadata(params["worksheet_id"])
     base_url = request.base_url
     paginator = Paginator(base_url=base_url, query_dict=params, page=int(params["page"]), limit=int(params["nrows"]))
     path = get_mapping_path(params["filename"], params["worksheet"])
-    #TODO: change data format
-    #data = paginator.load_paginated_dataframe(path, 10, params["worksheet_id"])
-
     if filter_sort:
         sort =filter_sort["sort"]
         filter = filter_sort["filter"]
 
 
-    data = update_table(path,params["page"], params["nrows"], sort, filter)
-    print("read data  : ", data)
+    data = update_table(params,path,params["page"], params["nrows"], sort, filter)
     headers = paginator.load_headers(path)
-    print("read headers   :", headers)
     domain_id = params["domain_id"]
     lables=checker_document.get_target_fields(domain_id, query={"name": {"$in": headers}})
     lables = list(map(lambda x: {"field":x["name"], "headerName":x["label"],"type":x["type"]},lables))
-    print("read results")
-    check_results = read_result(params,data )
-    print("read exposures  : " , check_results)
+    data["row_index"] = data.index.astype(int)
+    check_results = read_result(params, data )
     exposures = paginator.get_paginated_response(data,lables,check_results)
 
 
@@ -188,35 +176,6 @@ def read_results(params):
         return result
     except pd.errors.EmptyDataError:
         return check_results
-
-
-def delete_exposure(params, modifications):
-    """Deletes exposures and updates all metadata documents"""
-
-    checker_document = CheckerDocument()
-    modifier_document = ModifierDocument()
-    mapped_df = get_mapped_df(params["filename"], params["worksheet"])
-    result_df = get_check_results_df(params["filename"], params["worksheet"])
-
-    if modifications["is_all"]:
-        mapped_df = mapped_df.iloc[0:0]
-        result_df = result_df.iloc[0:0]
-        modifier_document.delete_check_modification(params["worksheet_id"])
-    else:
-        mapped_df = mapped_df.drop(mapped_df.index[modifications["indices"]])
-        result_df = result_df.drop(result_df.index[modifications["indices"]])
-        mapped_df.reset_index(inplace=True, drop=True)
-        result_df.reset_index(inplace=True, drop=True)
-
-        modifier_document.delete_check_modification(params["worksheet_id"], modifications["indices"])
-        modifier_document.update_indices(params["worksheet_id"], modifications["indices"])
-        
-    checker_document.delete_metadata(params, modifications, mapped_df, result_df)
-    save_mapped_df(mapped_df, params["filename"], params["worksheet"])
-    save_check_results_df(result_df, params["filename"], params["worksheet"])
-
-
-
 
 def read_column(params):
     """Reads longitude and latitude columns"""

@@ -71,11 +71,12 @@ def run_checks(final_df, params, target_fields, metadata=True):
     return data_check_result, result_df
 
 
-def check_modifications(final_df, tiv_df, params, target_fields, result_df, modifications):
+
+def check_modifications(final_df, row_indexes, params, target_fields, result_df, modifications):
     """Runs checks on modifications"""
 
-    modified_columns = {column: 1 for column in modifications["content"]}
-    indices = range(0, result_df.shape[0]) if modifications.get("is_all") else modifications.get("indices")
+    modified_columns = modifications.columns.keys()
+    indices = row_indexes
 
     data_check_result, modifications_result_df = run_checks(final_df, params, target_fields, metadata=False)
     modifications_result_df.index = indices
@@ -91,7 +92,7 @@ def check_modifications(final_df, tiv_df, params, target_fields, result_df, modi
         else:
             result_df[column].loc[indices] = check_column
 
-    update_data_check_metadata(data_check_result, result_df, modified_columns, modifications_result_df, indices)
+    update_data_check_metadata(data_check_result, result_df.astype('bool'), modified_columns, modifications_result_df, indices)
     return data_check_result, result_df
 
 
@@ -103,24 +104,25 @@ def update_data_check_metadata(data_check_result, result_df, modified_columns, m
     job_result = {}
     for column in result_df.columns.values:
         _, field_code, _ = eval(column)
-        if modified_columns.get(field_code) and modifications_result_df.get(column) is None:
+        if field_code in modified_columns and modifications_result_df.get(column) is None:
             if indices:
                 result_df[column].loc[indices] = False
             if not result_df[column].any():
                 result_df.drop(column, axis=1, inplace=True)
                 continue
-        total_errors_per_field = result_df[column].sum()
+        total_errors_per_field = len(result_df[column][result_df[column]==True])
         if total_errors_per_field:
             if job_result.get(field_code):
                 job_result[field_code] += total_errors_per_field
             else:
                 job_result[field_code] = total_errors_per_field
             total_errors_lines += int(total_errors_per_field)
-            unique_errors_lines.update(result_df.index[result_df[column]].tolist())
+            unique_errors_lines.update(result_df[column].index)
 
     data_check_result["jobResult"] = [{field_code: int(job_result[field_code])} for field_code in job_result]
     data_check_result["uniqueErrorLines"] = len(unique_errors_lines)
     data_check_result["totalErrors"] = total_errors_lines
+
 
 #TODO: change  spesific method and make it generic  by params
 def calculate_tiv(df):
