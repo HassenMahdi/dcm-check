@@ -52,7 +52,7 @@ def update_table(params,path,page_current, page_size, sort_by, filter):
     modifier = ModifierService()
     df= pd.read_csv(path, engine="c", dtype=str, skipinitialspace=True, na_filter=False, delimiter=";")
     filtering_expressions = filter.split(' && ')
-    dff = modifier.applys(params["worksheet"], params["domain_id"], [], df)
+    dff = modifier.applys(params["worksheet"], params["domain_id"], df)
     for filter_part in filtering_expressions:
         col_name, operator, filter_value = split_filter_part(filter_part)
 

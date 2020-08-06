@@ -135,8 +135,7 @@ def read_exposures(request, params,filter_sort):
 
     data = update_table(params,path,params["page"], params["nrows"], sort, filter)
     headers = paginator.load_headers(path)
-    domain_id = params["domain_id"]
-    lables=checker_document.get_target_fields(domain_id, query={"name": {"$in": headers}})
+    lables=checker_document.get_target_fields(params["domain_id"], query={"name": {"$in": headers}})
     lables = list(map(lambda x: {"field":x["name"], "headerName":x["label"],"type":x["type"]},lables))
     data["row_index"] = data.index.astype(int)
     check_results = read_result(params, data )

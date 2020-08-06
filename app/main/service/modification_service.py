@@ -21,13 +21,11 @@ class ModifierService:
         """ search by filename worksheet and domain id """
         modifications = self.mdb.get(worksheet,domain_id)
         if modifications:
-            try:
+
                 for key in modifications.columns.keys():
                     for row_index, value in modifications.columns[key].items():
                         df.loc[int(row_index)][key]= value
                 return df
-            except Exception:
-                traceback.print_exc()
         else:
             return df
 
