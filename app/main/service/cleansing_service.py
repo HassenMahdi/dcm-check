@@ -23,47 +23,43 @@ def run_checks(final_df, params, target_fields, metadata=True,modifs=[]):
                          "totalErrors": 0, "jobResult": []}
     #"currency": "EUR"
     for field_code, field_data in target_fields.items():
-        if len(modifs)>0 and field_code in modifs:
-            field_type = field_data["type"]
-            data_check = field_data["rules"]
-            empty_column = check_empty_df[field_code]
-            error_lines_per_field = []
-
-            if (field_type != "string") and (not empty_column.all()):
-                checker = CheckerFactory.get_checker("TYPE")
-                type_check = checker.run(final_df, field_code, empty_column, field_type=field_type)
-                if type_check is not None:
-                    print("TYPE")
-                    result_df = extend_result_df(result_df, type_check, checker.check_code, field_code,
+        field_type = field_data["type"]
+        data_check = field_data["rules"]
+        empty_column = check_empty_df[field_code]
+        error_lines_per_field = []
+        if (field_type != "string") and (not empty_column.all()):
+            checker = CheckerFactory.get_checker("TYPE")
+            type_check = checker.run(final_df, field_code, empty_column, field_type=field_type)
+            if type_check is not None:
+                print("TYPE")
+                result_df = extend_result_df(result_df, type_check, checker.check_code, field_code,
+                                             checker.check_level)
+                if metadata:
+                    error_lines_per_field = final_df[field_code][type_check].index.tolist()
+                    total_errors_per_field = len(error_lines_per_field)
+                    if total_errors_per_field:
+                        total_errors_lines += total_errors_per_field
+                        unique_errors_lines.update(error_lines_per_field)
+                        data_check_result["jobResult"].append({field_code: len(error_lines_per_field)})
+                continue
+        if data_check:
+            for check in data_check:
+                checker = CheckerFactory.get_checker(check["type"])
+                check_result = checker.run(final_df, field_code, empty_column, check=check, field_type=field_type,
+                                           empty_df=check_empty_df)
+                if check_result is not None:
+                    print(check["type"])
+                    result_df = extend_result_df(result_df, check_result, checker.check_code, field_code,
                                                  checker.check_level)
                     if metadata:
-                        error_lines_per_field = final_df[field_code][type_check].index.tolist()
-                        total_errors_per_field = len(error_lines_per_field)
-                        if total_errors_per_field:
-                            total_errors_lines += total_errors_per_field
-                            unique_errors_lines.update(error_lines_per_field)
-                            data_check_result["jobResult"].append({field_code: len(error_lines_per_field)})
-                    continue
-
-            if data_check:
-                for check in data_check:
-                    checker = CheckerFactory.get_checker(check["type"])
-
-                    check_result = checker.run(final_df, field_code, empty_column, check=check, field_type=field_type,
-                                               empty_df=check_empty_df)
-                    if check_result is not None:
-                        print(check["type"])
-                        result_df = extend_result_df(result_df, check_result, checker.check_code, field_code,
-                                                     checker.check_level)
-                        if metadata:
-                            error_lines = final_df[field_code][check_result].index.tolist()
-                            error_lines_per_field = list(set().union(error_lines_per_field, error_lines, []))
-                print(len(error_lines_per_field))
-                total_errors_per_field = len(error_lines_per_field)
-                if total_errors_per_field:
-                    total_errors_lines += total_errors_per_field
-                    unique_errors_lines.update(error_lines_per_field)
-                    data_check_result["jobResult"].append({field_code: len(error_lines_per_field)})
+                        error_lines = final_df[field_code][check_result].index.tolist()
+                        error_lines_per_field = list(set().union(error_lines_per_field, error_lines, []))
+            print(len(error_lines_per_field))
+            total_errors_per_field = len(error_lines_per_field)
+            if total_errors_per_field:
+                total_errors_lines += total_errors_per_field
+                unique_errors_lines.update(error_lines_per_field)
+                data_check_result["jobResult"].append({field_code: len(error_lines_per_field)})
 
     data_check_result["uniqueErrorLines"] = len(unique_errors_lines)
     data_check_result["totalErrors"] = total_errors_lines
