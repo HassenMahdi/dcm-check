@@ -94,6 +94,7 @@ def start_check_job(params, modifications={}):
         mapped_df.index =rows_indexes
         #Todo: load only modif column and apply only for n rows
         final_df = modifier.apply(modifs,mapped_df)
+        print(final_df)
         data_check_result, result_df = check_modifications(final_df, rows_indexes, params, target_fields, result_df,
                                                                modifs)
         save_check_results_df(result_df, params["filename"], params["worksheet"])
