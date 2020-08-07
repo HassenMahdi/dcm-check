@@ -91,6 +91,8 @@ def start_check_job(params, modifications={}):
                        set([index +1 for index in rows_indexes]))
 
         mapped_df = get_mapped_df(params["filename"], params["worksheet"], skiprows=skiprows, nrows=nrows)
+        print("rows_indexes =========================>",rows_indexes)
+        print("mapped_df =========================>",  mapped_df.index)
         mapped_df.index =rows_indexes
 
         #Todo: load only modif column and apply only for n rows
