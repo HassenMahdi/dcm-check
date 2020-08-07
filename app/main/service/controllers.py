@@ -67,8 +67,10 @@ def apply_mapping_transformation(df, params, target_fields):
 
 def start_check_job(params, modifications={}):
     """Starts the data check service"""
+
+
     checker_document = CheckerDocument()
-    modifier =ModifierService()
+    modifier=ModifierService()
     #TODO: get target fileds by domain and categories
     target_fields = checker_document.get_all_target_fields(params["domain_id"])
 
@@ -88,7 +90,7 @@ def start_check_job(params, modifications={}):
         mapped_df = get_mapped_df(params["filename"], params["worksheet"], skiprows=skiprows, nrows=nrows)
         mapped_df.index =rows_indexes
         #Todo: load only modif column and apply only for n rows
-        final_df = modifier.apply(modifs,mapped_df)
+        final_df = modifier.apply(params["worksheet"], params["domain_id"],modifs,mapped_df)
         data_check_result, result_df = check_modifications(final_df, rows_indexes, params, target_fields, result_df,
                                                                modifs)
         save_check_results_df(result_df, params["filename"], params["worksheet"])

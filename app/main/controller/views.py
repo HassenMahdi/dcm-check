@@ -21,10 +21,8 @@ api = Namespace('data check', description='checks')
 class CheckingData(Resource):
     get_request_param = {"filename": "The excel file name", "worksheet": "The name of worksheet",
                          "worksheet_id": "The created worksheet Id", "domain_id": "The domain Id", "domain_name": "The domain name"}
-    post_request_body = api.model("CheckingData", {
-        "is_all": fields.Boolean(required=True),
-        "indices": fields.List(fields.Integer, required=False),
-        "content": fields.Raw(required=True),
+    post_request_body = api.model("modificationData", {
+        "columns": fields.List(fields.Raw, required=False),
     })
 
     @api.doc("Check the data health")
