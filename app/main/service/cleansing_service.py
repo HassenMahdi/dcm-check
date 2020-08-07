@@ -24,6 +24,7 @@ def run_checks(final_df, params, target_fields, metadata=True):
     #"currency": "EUR"
     for field_code, field_data in target_fields.items():
         print(field_data)
+        print(field_code)
         field_type = field_data["type"]
         data_check = field_data["rules"]
         empty_column = check_empty_df[field_code]
