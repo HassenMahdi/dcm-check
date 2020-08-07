@@ -8,13 +8,13 @@ class ModifierService:
 
     def apply(self,modifications, df):
         """ search by filename worksheet and domain id """
+        print("final_df   modifs  after apply =========================>")
+        print("final_df   modifs  after apply =========================>  ",modifications.columns.keys())
+        for key in modifications.columns.keys():
+            print("   modifs  after apply =========================>  ", modifications.columns[key].items())
+            for row_index, value in modifications.columns[key].items():
+                df.loc[int(row_index)][key]= value
 
-        try:
-            for key in modifications.columns.keys():
-                for row_index, value in modifications.columns[key].items():
-                    df.loc[int(row_index)][key]= value
-        except Exception:
-            traceback.print_exc()
         return df
 
     def applys(self, worksheet,domain_id, df):
