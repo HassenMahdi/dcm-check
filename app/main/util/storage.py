@@ -60,7 +60,7 @@ def get_mapped_df(filename, worksheet, nrows=None, skiprows=None, usecols=None):
     """Creates a dataframe from mapped data csv file"""
 
     path = get_mapping_path(filename, worksheet, as_folder=False, create=True)
-    return get_dataframe_from_csv(path, nrows, skiprows, usecols)
+    return get_dataframe_from_csv(path, nrows, skiprows, usecols,";")
 
 
 def get_imported_data_df(filename, worksheet, nrows=None, skiprows=None):
