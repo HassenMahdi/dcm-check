@@ -78,7 +78,7 @@ def check_modifications(final_df, row_indexes, params, target_fields, result_df,
     modified_columns = modifications.columns.keys()
     indices = row_indexes
 
-    data_check_result, modifications_result_df = run_checks(final_df, params, target_fields, metadata=False)
+    data_check_result, modifications_result_df = run_checks(final_df, params, target_fields, metadata=False,modifs=modified_columns)
     modifications_result_df.index = indices
 
     for column in modifications_result_df.columns.values:
