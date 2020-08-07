@@ -92,11 +92,13 @@ def start_check_job(params, modifications={}):
 
         mapped_df = get_mapped_df(params["filename"], params["worksheet"], skiprows=skiprows, nrows=nrows)
         mapped_df.index =rows_indexes
-        print("mapped_df   modifs =========================>")
+
         #Todo: load only modif column and apply only for n rows
         final_df = modifier.apply(params["worksheet"], params["domain_id"],modifs,mapped_df)
+        print("final_df   modifs  after apply =========================>")
         data_check_result, result_df = check_modifications(final_df, rows_indexes, params, target_fields, result_df,
                                                                modifs)
+        print("final_df   modifs  after apply =========================>")
         save_check_results_df(result_df, params["filename"], params["worksheet"])
         print("end checks")
         print(time.time() - start)

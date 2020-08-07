@@ -123,7 +123,6 @@ def update_data_check_metadata(data_check_result, result_df, modified_columns, m
     data_check_result["uniqueErrorLines"] = len(unique_errors_lines)
     data_check_result["totalErrors"] = total_errors_lines
 
-
 #TODO: change  spesific method and make it generic  by params
 def calculate_tiv(df):
     """Calculates total insured value"""
