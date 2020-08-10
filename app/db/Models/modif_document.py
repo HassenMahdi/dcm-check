@@ -7,12 +7,14 @@ class ModificationsDocument:
         return m
 
     def save(self, m, **kwargs):
-        return mongo.db.modifications.save(m.to_dict())
+        document= m.to_dict()
+        return mongo.db.modifications.save(document)
 
 
 class Modifications:
     worksheet_id = None
-    domain_id=None
+    domain_id = None
+    _id = None
     columns = {}
 
     def __init__(self, obj, worksheet=None,domain_id=None):
@@ -20,12 +22,14 @@ class Modifications:
         self.worksheet_id = obj.get("worksheet_id") or worksheet
         self.domain_id=domain_id
         self.columns = obj.get("columns") or self.columns
+        self._id = obj.get("_id") or None
 
     def to_dict(self):
         return {
             "worksheet_id": self.worksheet_id,
             "domain_id":self.domain_id,
-            "columns": self.columns
+            "columns": self.columns,
+            "_id":self._id
         }
 
     def add_columns_modifications(self,column, modifications):
