@@ -16,6 +16,6 @@ class FormatChecker(Checker):
         if not empty_column.all():
             format_check = kwargs.get("check")
 
-            valid_format = format_check.get("type")
+            valid_format = format_check.get("regex")
             if valid_format:
                 return empty_column | (df[column].astype(str).str.match(valid_format))
