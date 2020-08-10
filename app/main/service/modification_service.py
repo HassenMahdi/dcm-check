@@ -21,7 +21,7 @@ class ModifierService:
 
                 for key in modifications.columns.keys():
                     for row_index, value in modifications.columns[key].items():
-                        df[key][int(row_index)]= value
+                        df[key][int(row_index)] = value
                 return df
         else:
             return df
