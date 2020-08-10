@@ -36,6 +36,9 @@ class ModifierService:
         self.mdb.save(m,_id=m._id)
         return m
 
+    def get(self, worksheet, domain_id, modifications):
+        return self.mdb.get(worksheet, domain_id)
+
     def update(self,m,modif):
         modif = self.transform_to_dict(modif)
         old_modif=m.columns.keys()

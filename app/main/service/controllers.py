@@ -108,10 +108,11 @@ def start_check_job(params, modifications={}):
         start = time.time()
         df = get_imported_data_df(params["filename"], params["worksheet"], nrows=None, skiprows=None)
 
-        modifier_document = ModifierDocument()
-        df = modifier_document.load_import_modifications(df, params["worksheet_id"])
+        modifs = modifier.get(params["worksheet"],params["domain_id"])
+        if modifs:
+            df = modifier.apply(modifs, df)
         final_df = apply_mapping_transformation(df, params, target_fields)
-        final_df = modifier_document.load_top_panel(final_df, params["worksheet_id"])
+
         save_mapped_df(final_df, params["filename"], params["worksheet"])
         print("end mapping")
         print(time.time() - start)
