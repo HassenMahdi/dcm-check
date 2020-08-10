@@ -36,7 +36,7 @@ class ModifierService:
         self.mdb.save(m,_id=m._id)
         return m
 
-    def get(self, worksheet, domain_id, modifications):
+    def get(self, worksheet, domain_id):
         return self.mdb.get(worksheet, domain_id)
 
     def update(self,m,modif):
