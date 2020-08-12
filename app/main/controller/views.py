@@ -8,8 +8,8 @@ from flask_restx import Resource, Namespace, fields
 
 from  app.main.util import responses as resp
 from app.main.util.responses import response_with
-from app.main.service.controllers import start_check_job, read_exposures, read_results, read_column
-from app.main.util.storage import get_import_path
+from app.main.service.controllers import start_check_job, read_exposures, read_column
+
     
 from app.db.Models.checker_documents import JobResultDocument, CheckerDocument
 
@@ -60,51 +60,10 @@ class ChecksMetadata(Resource):
 
         return jsonify(job_metadata)
 
-@api.route("/db")
-class ChecksMetadatas(Resource):
-    get_req_params = {"domain_id": "Job Id returned by the data check endpoint"}
-
-    @api.doc("Returns the data check results metadata")
-    @api.doc(params=get_req_params)
-    def get(self):
-        param = request.args.get("domain_id")
-
-        checker_document = CheckerDocument()
-
-        # TODO: get target fileds by domain and categories
-        target_fields = checker_document.get_all_target_fields(param)
-
-        return jsonify(target_fields)
-
-@api.route("/path")
-class ChecksMetadatass(Resource):
-    get_req_params = {"filename": "The excel file name", "worksheet": "The name of worksheet",
-                         "worksheet_id": "The created worksheet Id", "domain_id": "The domain Id"}
-
-    @api.doc("Returns the data check results metadata")
-    @api.doc(params=get_req_params)
-    def get(self):
-        param = {param: request.args.get(param) for param in ["filename", "worksheet", "domain_id", "nrows"]}
-
-        path = get_import_path(param["filename"], param["worksheet"], as_folder=False, create=True)
 
 
-        return jsonify(path)
 
-@api.route('/results')
-class CheckResults(Resource):
-    get_req_params = {"filename": "Excel file name", "worksheet": "Worksheet name",
-                      "page": "The page number", "nrows": "Number of rows to preview"}
 
-    @api.doc("Get paginated check results")
-    @api.doc(params=get_req_params)
-    def get(self):
-        params = {param: request.args.get(param) for param in ["filename", "worksheet", "page", "nrows"]}
-        params["nrows"] = 50 if params["nrows"] == "None" else int(params["nrows"])
-
-        check_results = read_results(params)
-
-        return jsonify(check_results)
 
 
 @api.route('/headers')
@@ -122,20 +81,7 @@ class DataGridHeaders(Resource):
 
         return jsonify(headers)
 
- # TODO: change reslut model to eliminate !!!
-@api.route('/exposures')
-class Exposures(Resource):
-    get_req_params = {"filename": "Excel file name", "worksheet": "Worksheet name", "page": "The page number",
-                      "worksheet_id": "The worksheet created Id", "nrows": "Number of rows to preview","domain_id":"domain_id"}
 
-    @api.doc("Get paginated exposures")
-    @api.doc(params=get_req_params)
-    def get(self):
-        params = {param: request.args.get(param) for param in ["filename","domain_id", "worksheet", "worksheet_id", "page",
-                                                               "nrows"]}
-        exposures = read_exposures(request, params,None)
-
-        return jsonify(exposures)
 
 @api.route('/read-column/')
 class ColumnReader(Resource):

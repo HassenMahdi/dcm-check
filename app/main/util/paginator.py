@@ -2,7 +2,6 @@ import math
 import time
 from urllib.parse import urlencode
 import pandas as pd
-from app.db.Models.modifier_document import ModifierDocument
 
 
 class Paginator:
@@ -80,37 +79,7 @@ class Paginator:
                                 nrows=0, sep=';').columns.tolist()
 
 
-    def load_paginated_dataframe(self, sheetPath, totalExposures, worksheet_id):
-        self.total = totalExposures
-        last_page = math.ceil(self.total / self.limit)
-        if last_page <= 0:
-            last_page = self.DEFAULT_PAGE
 
-        self.__generate_links(last_page)
-
-        offset = (self.page - 1) * self.limit
-        end = offset + self.limit
-
-        start = time.time()
-        exposures = pd.read_csv(sheetPath,
-                                engine='c',
-                                dtype=str,
-                                na_filter=False,
-                                skiprows=lambda x: x != 0 and x <= offset,
-                                nrows=self.limit,sep=';')
-
-        modifier_document = ModifierDocument()
-        modification = {"indices": list(range(offset, end)), "is_all": False}
-        exposures = modifier_document.load_check_modifications(exposures, worksheet_id, modification)
-
-        end = time.time()
-
-        # save offset for later use
-        self.offset = offset
-
-        print("Paginated exposures loading took %s" % (end - start))
-
-        return exposures
 
     def get_paginated_response(self, data,labels,check_results):
         paginated_response = {

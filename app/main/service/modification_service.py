@@ -10,7 +10,7 @@ class ModifierService:
         """ search by filename worksheet and domain id """
         for key in modifications.columns.keys():
            for row_index, value in modifications.columns[key].items():
-                df.loc[int(row_index)][key]= value
+                df[key][int(row_index)]= value
 
         return df
 

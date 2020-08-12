@@ -8,7 +8,6 @@ import pandas as pd
 from app.main.service.filter_service import update_table
 from app.main.service.modification_service import ModifierService
 from app.main.util.paginator import Paginator
-from app.db.Models.modifier_document import ModifierDocument
 from app.main.service.cleansing_service import run_checks, check_modifications
 from  app.db.Models.checker_documents import CheckerDocument, JobResultDocument
 from app.main.util.storage import get_mapped_df, get_imported_data_df, save_mapped_df, save_check_results_df, \

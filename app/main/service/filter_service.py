@@ -2,9 +2,6 @@ import pandas as pd
 
 from app.main.service.modification_service import ModifierService
 
-
-
-PAGE_SIZE = 5
 #startswith ,endswith ,Not equal ,Equals,Not contains
 #Equals, Not equal, Less than, Less than or equals, Greater than, Greater than or equals, In range
 #Equals , Greater than, Less than , Not equal , In range
