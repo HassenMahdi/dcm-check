@@ -67,7 +67,7 @@ def get_imported_data_df(filename, worksheet, nrows=None, skiprows=None):
     """Creates a dataframe from imported worksheet csv file"""
 
     path = get_import_path(filename, worksheet, as_folder=False, create=True)
-    return get_dataframe_from_csv(path, nrows, skiprows)
+    return get_dataframe_from_csv(path, nrows, skiprows,",")
 
 
 def save_check_results_df(df, filename, worksheet):

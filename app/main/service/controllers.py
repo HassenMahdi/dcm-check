@@ -147,39 +147,6 @@ def read_exposures(request, params,filter_sort):
     return exposures
 
 
-def read_results(params):
-    """Reads the data check result file"""
-
-    offset = (int(params["page"])-1) * params["nrows"]
-    end = offset + params["nrows"] - 1
-    check_results = {"count": 0, "errors": {}, "warnings": {}}
-
-    try:
-        df = get_check_results_df(params["filename"], params["worksheet"]).loc[offset:end]
-        check_results["count"] = df.shape[0]
-        result = {}
-        for column in df.columns.values:
-            check_type, field_code, error_type = eval(column)
-            check_results[error_type][field_code] = {}
-            check_results[error_type][field_code][check_type] = df.index[df[column] == 'True'].tolist()
-
-            error = {}
-            indexes = df.index[df[column] == 'True']
-            for index in df.index:
-                if index in indexes:
-                    target = result.setdefault(count, {})
-                    target = target.setdefault(field_code, {})
-                    target = target.setdefault(error_type, [])
-                    target.append(check_type)
-                else:
-                    result.setdefault(count, {})
-                count = count + 1
-
-
-
-        return result
-    except pd.errors.EmptyDataError:
-        return check_results
 
 def read_column(params):
     """Reads longitude and latitude columns"""
