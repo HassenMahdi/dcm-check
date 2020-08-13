@@ -66,7 +66,10 @@ def apply_mapping_transformation(df, params, target_fields):
 
 def start_check_job(params, modifications={}):
     """Starts the data check service"""
-
+    if params.get("isTransformed",False):
+        transformed_path = params["worksheet"].split('/')
+        params["filename"] = transformed_path[-2]
+        params["worksheet"]=transformed_path[-1]
 
     checker_document = CheckerDocument()
     modifier=ModifierService()
@@ -123,7 +126,10 @@ def start_check_job(params, modifications={}):
 
 def read_exposures(request, params,filter_sort):
     """Reads the mapped data csv file"""
-
+    if params.get("isTransformed",False):
+        transformed_path = params["worksheet"].split('/')
+        params["filename"] = transformed_path[-2]
+        params["worksheet"] = transformed_path[-1]
     sort = []
     filter = ""
     checker_document = CheckerDocument()
@@ -149,7 +155,7 @@ def read_exposures(request, params,filter_sort):
 
 
 def read_column(params):
-    """Reads longitude and latitude columns"""
+    """Reads all or unique values by column"""
 
     mapped_df = get_mapped_df(params["filename"], params["worksheet"], usecols=[params["column"]])
     if params["unique"]:
@@ -160,8 +166,7 @@ def read_column(params):
 
 def read_result(params,data):
     """Reads the data check result file"""
-    sort = []
-    filter = ""
+
     check_results = {"count": 0, "errors": {}, "warnings": {}}
 
     try:
@@ -179,7 +184,6 @@ def read_result(params,data):
             check_results[error_type][field_code][check_type] = df.index[df[column] == 'True'].tolist()
 
             error = {}
-            indexes = df.index[df[column] == 'True']
             count = 0
             indexes = df.index[df[column] == 'True']
             for index in df.index:

@@ -75,20 +75,21 @@ def check_modifications(final_df, row_indexes, params, target_fields, result_df,
     indices = row_indexes
 
     data_check_result, modifications_result_df = run_checks(final_df, params, target_fields, metadata=False,modifs=modified_columns)
-    modifications_result_df.index = indices
+    if len(modifications_result_df)>0:
+        modifications_result_df.index = indices
 
-    for column in modifications_result_df.columns.values:
-        check_type, field_code, error_type = eval(column)
-        check_column = pd.Series(data=False, index=range(0, result_df.shape[0]))
-        check_column.loc[indices] = modifications_result_df[column]
+        for column in modifications_result_df.columns.values:
+            check_type, field_code, error_type = eval(column)
+            check_column = pd.Series(data=False, index=range(0, result_df.shape[0]))
+            check_column.loc[indices] = modifications_result_df[column]
 
-        if result_df.get(column) is None:
-            result_df = extend_result_df(result_df, check_column, check_type,
+            if result_df.get(column) is None:
+                result_df = extend_result_df(result_df, check_column, check_type,
                                          field_code, error_type)
-        else:
-            result_df[column].loc[indices] = check_column
+            else:
+                result_df[column].loc[indices] = check_column
 
-    update_data_check_metadata(data_check_result, result_df.astype('bool'), modified_columns, modifications_result_df, indices)
+        update_data_check_metadata(data_check_result, result_df.astype('bool'), modified_columns, modifications_result_df, indices)
     return data_check_result, result_df
 
 
