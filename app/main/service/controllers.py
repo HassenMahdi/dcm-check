@@ -97,9 +97,9 @@ def start_check_job(params, modifications={}):
         #Todo: load only modif column and apply only for n rows
         final_df = modifier.apply(modifs,mapped_df)
         print(final_df)
-        data_check_result, result_df = check_modifications(final_df, rows_indexes, params, target_fields, result_df,
+        data_check_result, result_dfs = check_modifications(final_df, rows_indexes, params, target_fields, result_df,
                                                                modifs)
-        save_check_results_df(result_df, params["filename"], params["worksheet"])
+        save_check_results_df(result_dfs, params["filename"], params["worksheet"])
         print("end checks")
         print(time.time() - start)
         print(result_df.shape)

@@ -89,7 +89,7 @@ def check_modifications(final_df, row_indexes, params, target_fields, result_df,
             else:
                 result_df[column].loc[indices] = check_column
 
-        update_data_check_metadata(data_check_result, result_df.astype('bool'), modified_columns, modifications_result_df, indices)
+        data_check_result, result_df= update_data_check_metadata(data_check_result, result_df.astype('bool'), modified_columns, modifications_result_df, indices)
     return data_check_result, result_df
 
 
@@ -102,7 +102,7 @@ def update_data_check_metadata(data_check_result, result_df, modified_columns, m
     for column in result_df.columns.values:
         _, field_code, _ = eval(column)
         if field_code in modified_columns and modifications_result_df.get(column) is None:
-            if indices:
+            if indices :
                 result_df[column].loc[indices] = False
             if not result_df[column].any():
                 result_df.drop(column, axis=1, inplace=True)
@@ -119,6 +119,7 @@ def update_data_check_metadata(data_check_result, result_df, modified_columns, m
     data_check_result["jobResult"] = [{field_code: int(job_result[field_code])} for field_code in job_result]
     data_check_result["uniqueErrorLines"] = len(unique_errors_lines)
     data_check_result["totalErrors"] = total_errors_lines
+    return data_check_result, result_df
 
 #TODO: change  spesific method and make it generic  by params
 def calculate_tiv(df):
