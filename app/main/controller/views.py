@@ -21,7 +21,7 @@ api = Namespace('data check', description='checks')
 class CheckingData(Resource):
     get_request_param = {"filename": "The excel file name", "worksheet": "The name of worksheet",
                          "worksheet_id": "The created worksheet Id", "domain_id": "The domain Id", "domain_name": "The domain name",
-                         "isTransformed":"isTransformed"}
+                         "isTransformed":"isTransformed","mappingId":"mappingId"}
     post_request_body = api.model("modificationData", {
         "columns": fields.List(fields.Raw, required=False),
     })
@@ -33,7 +33,7 @@ class CheckingData(Resource):
         if request.method == 'POST':
             try:
                 params = {param: request.args.get(param) for param in ["filename", "worksheet", "worksheet_id",
-                                                                       "domain_name", "domain_id", "isTransformed"]}
+                                                                       "domain_name", "domain_id", "isTransformed","mappingId"]}
                 modifications = request.get_json()
                 result = start_check_job(params, modifications=modifications)
 
@@ -100,7 +100,7 @@ class ColumnReader(Resource):
 class Exposures(Resource):
     get_request_param ={"filename": "Excel file name", "worksheet": "Worksheet name", "page": "The page number",
                       "worksheet_id": "The worksheet created Id", "nrows": "Number of rows to preview","domain_id":"domain_id",
-                        "isTransformed":"isTransformed"}
+                        "isTransformed":"isTransformed","mappingId":"mappingId"}
 
     post_request_body = api.model("CheckingData", {
         "filter": fields.String(description='filter string expression',required=False),
@@ -115,7 +115,7 @@ class Exposures(Resource):
             try:
                 params = {param: request.args.get(param) for param in
                           ["filename", "domain_id", "worksheet", "worksheet_id", "page",
-                           "nrows", "isTransformed"]}
+                           "nrows", "isTransformed","mappingId"]}
                 filter_sort = request.get_json()
 
                 exposures = read_exposures(request, params,filter_sort)

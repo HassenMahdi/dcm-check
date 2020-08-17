@@ -29,9 +29,9 @@ def apply_mapping_transformation(df, params, target_fields):
     transformed_df = pd.DataFrame(columns=target_fields_names)
     default_values = checker_document.get_default_values(params["domain_id"])
     if params.get("isTransformed",False) == "true":
-        mappings = checker_document.get_mappings(params["worksheet"].split('.')[0], params["domain_id"])
+        mappings = checker_document.get_mappings(params["mappingId"].split('.')[0])
     else:
-        mappings = checker_document.get_mappings(params["worksheet"], params["domain_id"])
+        mappings = checker_document.get_mappings(params["mappingId"])
 
     for target, source in mappings.items():
         data_type = target_fields[target]["type"]
@@ -54,7 +54,7 @@ def apply_mapping_transformation(df, params, target_fields):
         transformed_df["pd_split"] = "No"
     else:
         transformed_df["pd_split"] = "Yes"
-    condition = [{"property": "pd_split", "value": transformed_df.loc[0]["pd_split"]}]
+    #condition = [{"property": "pd_split", "value": transformed_df.loc[0]["pd_split"]}]
     #formulas = checker_document.get_calculated_fields_formula(params["lob_id"], condition, mappings)
 
     #for field_code, formula in formulas.items():
@@ -115,7 +115,7 @@ def start_check_job(params, modifications={}):
         start = time.time()
         df = get_imported_data_df(params["filename"], params["worksheet"], nrows=None, skiprows=None,isTransformed=isTransformed)
         final_df = apply_mapping_transformation(df, params, target_fields)
-        final_df = modifier.applys(params["worksheet"], params["domain_id"], final_df)
+        final_df = modifier.applys(params["mappingId"], final_df)
         save_mapped_df(final_df, params["filename"], params["worksheet"])
         print("end mapping")
         print(time.time() - start)

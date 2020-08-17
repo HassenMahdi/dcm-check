@@ -9,12 +9,12 @@ import app.main.service.cleansing_service as cleansing_service
 
 class CheckerDocument:
 
-    def get_mappings(self,fileId, domainId):
+    def get_mappings(self,mappingId):
         """Fetches a document from the mappings collection based on the given params"""
 
         mappings = mongo.db.mappings
 
-        mapping = mappings.find_one({"fileId": fileId, "domainId": domainId}, {"_id": 0, "rules": 1})
+        mapping = mappings.find_one({"mappingId": mappingId}, {"_id": 0, "rules": 1})
         if mapping:
             return {rule["target"]: rule["source"] for rule in mapping["rules"]}
 
