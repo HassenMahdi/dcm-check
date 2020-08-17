@@ -28,7 +28,7 @@ def apply_mapping_transformation(df, params, target_fields):
     target_fields_names=[key for key in target_fields.keys()]
     transformed_df = pd.DataFrame(columns=target_fields_names)
     default_values = checker_document.get_default_values(params["domain_id"])
-    if bool(params.get("isTransformed",False)) is "true":
+    if params.get("isTransformed",False) == "true":
         mappings = checker_document.get_mappings(params["worksheet"].split('.')[0], params["domain_id"])
     else:
         mappings = checker_document.get_mappings(params["worksheet"], params["domain_id"])
@@ -70,7 +70,7 @@ def apply_mapping_transformation(df, params, target_fields):
 def start_check_job(params, modifications={}):
     """Starts the data check service"""
     isTransformed=False
-    if bool(params.get("isTransformed",False)) is "true":
+    if params.get("isTransformed",False) == "true":
         isTransformed=True
         transformed_path = params["worksheet"].split('/')
         params["filename"] = transformed_path[-2]
@@ -131,7 +131,7 @@ def start_check_job(params, modifications={}):
 
 def read_exposures(request, params,filter_sort):
     """Reads the mapped data csv file"""
-    if params.get("isTransformed",False) is "true" :
+    if params.get("isTransformed",False) == "true" :
         transformed_path = params["worksheet"].split('/')
         params["filename"] = transformed_path[-2]
         params["worksheet"] = transformed_path[-1]
