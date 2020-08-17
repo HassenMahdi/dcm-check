@@ -63,11 +63,15 @@ def get_mapped_df(filename, worksheet, nrows=None, skiprows=None, usecols=None):
     return get_dataframe_from_csv(path, nrows, skiprows, usecols,";")
 
 
-def get_imported_data_df(filename, worksheet, nrows=None, skiprows=None):
+def get_imported_data_df(filename, worksheet, nrows=None, skiprows=None,isTransformed=False):
     """Creates a dataframe from imported worksheet csv file"""
 
     path = get_import_path(filename, worksheet, as_folder=False, create=True)
-    return get_dataframe_from_csv(path, nrows, skiprows)
+    if isTransformed:
+        return get_dataframe_from_csv(path, nrows,skiprows,None,";")
+    else:
+        return get_dataframe_from_csv(path, nrows, skiprows)
+
 
 
 def save_check_results_df(df, filename, worksheet):

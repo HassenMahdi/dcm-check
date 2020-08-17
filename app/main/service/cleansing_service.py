@@ -27,7 +27,7 @@ def run_checks(final_df, params, target_fields, metadata=True,modifs=[]):
         data_check = field_data["rules"]
         empty_column = check_empty_df[field_code]
         error_lines_per_field = []
-        if (field_type != "string") and (not empty_column.all()):
+        """ if (field_type != "string") and (not empty_column.all()):
             checker = CheckerFactory.get_checker("TYPE")
             type_check = checker.run(final_df, field_code, empty_column, field_type=field_type)
             if type_check is not None:
@@ -41,7 +41,8 @@ def run_checks(final_df, params, target_fields, metadata=True,modifs=[]):
                         total_errors_lines += total_errors_per_field
                         unique_errors_lines.update(error_lines_per_field)
                         data_check_result["jobResult"].append({field_code: len(error_lines_per_field)})
-                continue
+                continue 
+"""
         if data_check:
             for check in data_check:
                 checker = CheckerFactory.get_checker(check["type"])
@@ -73,15 +74,16 @@ def check_modifications(final_df, row_indexes, params, target_fields, result_df,
 
     modified_columns = modifications.columns.keys()
     indices = row_indexes
-
+    #previus_reslut_columns= [eval(column)[1] for column in result_df.columns.values]
     data_check_result, modifications_result_df = run_checks(final_df, params, target_fields, metadata=False,modifs=modified_columns)
     if len(modifications_result_df)>0:
         modifications_result_df.index = indices
 
         for column in modifications_result_df.columns.values:
+
             check_type, field_code, error_type = eval(column)
-            check_column = pd.Series(data=False, index=range(0, result_df.shape[0]))
-            check_column.loc[indices] = modifications_result_df[column]
+            check_column =pd.Series(data=False, index=range(0, result_df.shape[0]))
+            check_column[indices] = modifications_result_df[column]
 
             if result_df.get(column) is None:
                 result_df = extend_result_df(result_df, check_column, check_type,
@@ -101,12 +103,13 @@ def update_data_check_metadata(data_check_result, result_df, modified_columns, m
     job_result = {}
     for column in result_df.columns.values:
         _, field_code, _ = eval(column)
-        if field_code in modified_columns and modifications_result_df.get(column) is None:
+        """if field_code in modified_columns and modifications_result_df.get(column) is None:
             if indices :
                 result_df[column].loc[indices] = False
             if not result_df[column].any():
-                result_df.drop(column, axis=1, inplace=True)
-                continue
+                result_df.drop(column, axis=1, inplace=False)
+               continue
+               """
         total_errors_per_field = len(result_df[column][result_df[column]==True])
         if total_errors_per_field:
             if job_result.get(field_code):

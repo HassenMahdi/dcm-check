@@ -19,3 +19,29 @@ class FormatChecker(Checker):
             valid_format = format_check.get("regex")
             if valid_format:
                 return empty_column | (df[column].astype(str).str.match(valid_format))
+            else:
+
+                field_type = kwargs.get("field_type", "string")
+                rgx = self.get_regex(field_type)
+                match = df[column].astype(str).str.match("^" + rgx + "$", case=False)
+                if field_type =="string":
+                    return  match == False
+                else:
+                    return  match
+
+    def get_regex(self, field_type):
+        """Returns a regex that represents the field type"""
+
+        dict_format = {
+            "double": "-?\d*(.?,?\d*)?",
+            "boolean": "(yes)|(no)|(False)|(True)",
+            "date": "(\d{2})/(\d{2})/(\d{4})$",
+            "int": "-?\d*"
+        }
+
+        return dict_format.get(field_type, "")
+
+    def get_message(self, **kwargs):
+        t = kwargs.get("type", "ERROR")
+        p = kwargs.get("name", "ERROR")
+        return self.check_message % (p, t)

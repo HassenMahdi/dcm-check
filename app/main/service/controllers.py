@@ -28,7 +28,10 @@ def apply_mapping_transformation(df, params, target_fields):
     target_fields_names=[key for key in target_fields.keys()]
     transformed_df = pd.DataFrame(columns=target_fields_names)
     default_values = checker_document.get_default_values(params["domain_id"])
-    mappings = checker_document.get_mappings(params["worksheet_id"], params["domain_id"])
+    if bool(params.get("isTransformed",False)):
+        mappings = checker_document.get_mappings(params["worksheet"].split('.')[0], params["domain_id"])
+    else:
+        mappings = checker_document.get_mappings(params["worksheet"], params["domain_id"])
 
     for target, source in mappings.items():
         data_type = target_fields[target]["type"]
@@ -66,7 +69,9 @@ def apply_mapping_transformation(df, params, target_fields):
 
 def start_check_job(params, modifications={}):
     """Starts the data check service"""
-    if params.get("isTransformed",False):
+    isTransformed=False
+    if bool(params.get("isTransformed",False)) :
+        isTransformed=True
         transformed_path = params["worksheet"].split('/')
         params["filename"] = transformed_path[-2]
         params["worksheet"]=transformed_path[-1]
@@ -108,7 +113,7 @@ def start_check_job(params, modifications={}):
         return job_result_document.save_check_job(data_check_result)
     else:
         start = time.time()
-        df = get_imported_data_df(params["filename"], params["worksheet"], nrows=None, skiprows=None)
+        df = get_imported_data_df(params["filename"], params["worksheet"], nrows=None, skiprows=None,isTransformed=isTransformed)
         final_df = apply_mapping_transformation(df, params, target_fields)
         final_df = modifier.applys(params["worksheet"], params["domain_id"], final_df)
         save_mapped_df(final_df, params["filename"], params["worksheet"])
@@ -126,7 +131,7 @@ def start_check_job(params, modifications={}):
 
 def read_exposures(request, params,filter_sort):
     """Reads the mapped data csv file"""
-    if params.get("isTransformed",False):
+    if bool(params.get("isTransformed",False)):
         transformed_path = params["worksheet"].split('/')
         params["filename"] = transformed_path[-2]
         params["worksheet"] = transformed_path[-1]
