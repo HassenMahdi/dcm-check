@@ -71,7 +71,7 @@ def run_checks(final_df, params, target_fields, metadata=True,modifs=[]):
 
 def check_modifications(final_df, row_indexes, params, target_fields, result_df, modifications):
     """Runs checks on modifications"""
-
+    cdf=result_df.copy()
     modified_columns = modifications.columns.keys()
     indices = row_indexes
     #previus_reslut_columns= [eval(column)[1] for column in result_df.columns.values]
@@ -85,13 +85,13 @@ def check_modifications(final_df, row_indexes, params, target_fields, result_df,
             check_column =pd.Series(data=False, index=range(0, result_df.shape[0]))
             check_column[indices] = modifications_result_df[column]
 
-            if result_df.get(column) is None:
-                result_df = extend_result_df(result_df, check_column, check_type,
+            if cdf.get(column) is None:
+                cdf = extend_result_df(cdf, check_column, check_type,
                                          field_code, error_type)
             else:
-                result_df[column].loc[indices] = check_column
+                cdf[column].loc[indices] = check_column[indices]
 
-        data_check_result, result_df= update_data_check_metadata(data_check_result, result_df.astype('bool'), modified_columns, modifications_result_df, indices)
+        data_check_result, result_df= update_data_check_metadata(data_check_result, cdf, modified_columns, modifications_result_df, indices)
     return data_check_result, result_df
 
 
@@ -105,12 +105,12 @@ def update_data_check_metadata(data_check_result, result_df, modified_columns, m
         _, field_code, _ = eval(column)
         """if field_code in modified_columns and modifications_result_df.get(column) is None:
             if indices :
-                result_df[column].loc[indices] = False
+                result_df[column].loc[indices] = modifications_result_df[column].loc[indices]
             if not result_df[column].any():
                 result_df.drop(column, axis=1, inplace=False)
-               continue
-               """
-        total_errors_per_field = len(result_df[column][result_df[column]==True])
+               continue """
+
+        total_errors_per_field = len(result_df[column][result_df[column]=="True"])
         if total_errors_per_field:
             if job_result.get(field_code):
                 job_result[field_code] += total_errors_per_field
