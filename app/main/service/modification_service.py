@@ -14,9 +14,9 @@ class ModifierService:
 
         return df
 
-    def applys(self, mappingId, df):
+    def applys(self, worksheet,domain_id, df):
         """ search by filename worksheet and domain id """
-        modifications = self.mdb.get_by_id(mappingId)
+        modifications = self.mdb.get(worksheet,domain_id)
         if modifications:
 
                 for key in modifications.columns.keys():

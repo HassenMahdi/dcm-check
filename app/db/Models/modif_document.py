@@ -5,10 +5,6 @@ class ModificationsDocument:
     def get(self,worksheet,domain_id):
         m = Modifications(mongo.db.modifications.find_one({'worksheet_id': worksheet,'domain_id':domain_id}), worksheet=worksheet,domain_id=domain_id)
         return m
-    def get_by_id(self,mapping_id):
-        m = Modifications(mongo.db.modifications.find_one({'mappingId': mapping_id}),
-                          mapping_id=mapping_id)
-        return m
 
     def save(self, m, **kwargs):
         document= m.to_dict()
