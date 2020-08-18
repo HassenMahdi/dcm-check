@@ -9,6 +9,10 @@ from app.main.service.checks.format_checker import FormatChecker
 from app.main.service.checks.type_checker import TypeChecker
 from app.main.service.checks.reference_checker import ReferenceChecker
 from app.main.service.checks.validation_checker import ValidationChecker
+from app.main.service.checks.interval import IntervalChecker
+from app.main.service.checks.max import MaxChecker
+from app.main.service.checks.min import MinChecker
+
 
 
 class CheckerFactory(ABC):
@@ -32,5 +36,11 @@ class CheckerFactory(ABC):
             return ReferenceChecker()
         elif check_code == CheckTypesEnum.Format.value:
             return FormatChecker()
+        elif check_code == CheckTypesEnum.Interval.value:
+            return IntervalChecker()
+        elif check_code == CheckTypesEnum.Max.value:
+            return MaxChecker()
+        elif check_code == CheckTypesEnum.Min.value:
+            return MinChecker()
         else:
             raise ValueError(check_code)

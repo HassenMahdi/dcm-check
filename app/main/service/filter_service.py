@@ -2,9 +2,6 @@ import pandas as pd
 
 from app.main.service.modification_service import ModifierService
 
-#startswith ,endswith ,Not equal ,Equals,Not contains
-#Equals, Not equal, Less than, Less than or equals, Greater than, Greater than or equals, In range
-#Equals , Greater than, Less than , Not equal , In range
 
 
 operators = [['ge ', 'greaterThanOrEqual'],
@@ -55,7 +52,7 @@ def update_table(params,path,page_current, page_size, sort_by, filter):
 
         if operator in ('lt', 'le', 'gt', 'ge'):
             # these operators match pandas series operator method names
-            dff = dff.loc[getattr(dff[col_name].astype(float), operator)(float(filter_value))]
+            dff = dff.loc[getattr(pd.to_numeric(df[col_name], errors='coerce'), operator)(float(filter_value))]
         elif operator in ('eq', 'ne'):
             dff = dff.loc[getattr(dff[col_name], operator)(filter_value)]
         elif operator == 'contains':

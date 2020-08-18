@@ -103,12 +103,12 @@ def update_data_check_metadata(data_check_result, result_df, modified_columns, m
     job_result = {}
     for column in result_df.columns.values:
         _, field_code, _ = eval(column)
-        """if field_code in modified_columns and modifications_result_df.get(column) is None:
+        if field_code in modified_columns and modifications_result_df.get(column) is None:
             if indices :
-                result_df[column].loc[indices] = modifications_result_df[column].loc[indices]
+                result_df[column].loc[indices] = "False"
             if not result_df[column].any():
                 result_df.drop(column, axis=1, inplace=False)
-               continue """
+                continue
 
         total_errors_per_field = len(result_df[column][result_df[column]=="True"])
         if total_errors_per_field:
