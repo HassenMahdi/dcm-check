@@ -72,6 +72,8 @@ def start_check_job(params, modifications={}):
         transformed_path = params["worksheet"].split('/')
         params["filename"] = transformed_path[-2]
         params["worksheet"]=transformed_path[-1]
+        print("fileName==> ",params["filename"])
+        print("worksheet==> " ,params["worksheet"])
 
     checker_document = CheckerDocument()
     modifier=ModifierService()
