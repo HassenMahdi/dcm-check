@@ -5,6 +5,8 @@ import enum
 
 from app.main.service.checks.empty_checker import EmptyChecker
 from app.main.service.checks.format_checker import FormatChecker
+from app.main.service.checks.property_max import MaxPropertyChecker
+from app.main.service.checks.property_min import MinPropertyChecker
 from app.main.service.checks.type_checker import TypeChecker
 from app.main.service.checks.reference_checker import ReferenceChecker
 from app.main.service.checks.validation_checker import ValidationChecker
@@ -24,3 +26,5 @@ class CheckTypesEnum(enum.Enum):
     Interval = IntervalChecker.check_code
     Min = MinChecker.check_code
     Max = MaxChecker.check_code
+    MaxProperty = MaxPropertyChecker.check_code
+    MinProperty = MinPropertyChecker.check_code

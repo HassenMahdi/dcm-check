@@ -6,6 +6,8 @@ from abc import ABC, abstractmethod
 from app.main.service.checks.check_type_enum import  CheckTypesEnum
 from app.main.service.checks.empty_checker import EmptyChecker
 from app.main.service.checks.format_checker import FormatChecker
+from app.main.service.checks.property_max import MaxPropertyChecker
+from app.main.service.checks.property_min import MinPropertyChecker
 from app.main.service.checks.type_checker import TypeChecker
 from app.main.service.checks.reference_checker import ReferenceChecker
 from app.main.service.checks.validation_checker import ValidationChecker
@@ -42,5 +44,9 @@ class CheckerFactory(ABC):
             return MaxChecker()
         elif check_code == CheckTypesEnum.Min.value:
             return MinChecker()
+        elif check_code == CheckTypesEnum.MaxProperty.value:
+            return MaxPropertyChecker()
+        elif check_code == CheckTypesEnum.MinProperty.value:
+            return MinPropertyChecker()
         else:
             raise ValueError(check_code)

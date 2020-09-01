@@ -10,9 +10,6 @@ class MaxChecker(Checker):
     filter_name = "max"
 
 
-
-
-
     def check_column(self, df, column, empty_column, *args, **kwargs):
 
         if not empty_column.all():
