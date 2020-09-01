@@ -41,11 +41,8 @@ class CheckingData(Resource):
 
             except Exception:
                 traceback.print_exc()
-                return dict(
-                    stack=traceback.format_stack(),
-                    exec=traceback.format_exc(),
-                    exception=traceback.format_exception()
-                )
+
+                return response_with(resp.SERVER_ERROR_500)
 
 
 @api.route("/metadata")

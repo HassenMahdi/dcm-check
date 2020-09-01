@@ -11,15 +11,15 @@ class MaxPropertyChecker(Checker):
 
 
     def check_column(self, df, column, empty_column, *args, **kwargs):
-        # try:
-        inclusive = kwargs.get("check").get("inclusive", False)
-        limit_column = kwargs.get("check").get("property")
-        limit_df = pd.to_numeric(df[limit_column], errors='coerce')
-        column_values = pd.to_numeric(df[column], errors='coerce')
-        if inclusive:
-            return column_values <= limit_df
-        else:
-            return column_values < limit_df
+        try:
+            inclusive = kwargs.get("check").get("inclusive", False)
+            limit_column = kwargs.get("check").get("property")
+            limit_df = pd.to_numeric(df[limit_column], errors='coerce')
+            column_values = pd.to_numeric(df[column], errors='coerce')
+            if inclusive:
+                return column_values <= limit_df
+            else:
+                return column_values < limit_df
 
-        # except:
-        #     return empty_column
+        except:
+            return empty_column
