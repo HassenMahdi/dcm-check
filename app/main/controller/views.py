@@ -45,7 +45,7 @@ class CheckingData(Resource):
                     stack=traceback.format_stack(),
                     exec=traceback.format_exc(),
                     exception=traceback.format_exception()
-                ), 500
+                )
 
 
 @api.route("/metadata")
