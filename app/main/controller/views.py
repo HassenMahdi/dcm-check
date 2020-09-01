@@ -40,10 +40,12 @@ class CheckingData(Resource):
                 return jsonify(result)
 
             except Exception:
-
                 traceback.print_exc()
-
-                return response_with(resp.SERVER_ERROR_500)
+                return dict(
+                    stack=traceback.format_stack(),
+                    exec=traceback.format_exc(),
+                    exception=traceback.format_exception()
+                ), 500
 
 
 @api.route("/metadata")
