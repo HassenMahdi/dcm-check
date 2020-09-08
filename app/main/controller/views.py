@@ -41,7 +41,7 @@ class CheckingData(Resource):
 
             except Exception:
                 print('CHECK FAILED')
-                print(str(traceback.format_exception()))
+                print(str(traceback.format_stack()))
                 traceback.print_exc()
 
                 return response_with(resp.SERVER_ERROR_500)
@@ -65,7 +65,7 @@ class ChecksMetadata(Resource):
 
         except Exception:
             print('CHECK FAILED')
-            print(str(traceback.format_exception()))
+            print(str(traceback.format_stack()))
             traceback.print_exc()
 
             return response_with(resp.SERVER_ERROR_500)
@@ -133,7 +133,7 @@ class Exposures(Resource):
 
             except Exception:
                 print('DATA FAILED')
-                print(str(traceback.format_exception()))
+                print(str(traceback.format_stack()))
                 traceback.print_exc()
 
             return response_with(resp.SERVER_ERROR_500)
