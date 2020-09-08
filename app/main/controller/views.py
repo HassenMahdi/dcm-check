@@ -127,6 +127,7 @@ class Exposures(Resource):
 
             except Exception as exp:
                 print(exp)
+                print(exp.with_traceback())
                 print('DATA FAILED')
                 traceback.print_exc()
 
