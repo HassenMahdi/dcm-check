@@ -11,7 +11,7 @@ class Config:
     DEBUG = False
 #    MONGO_URI = "mongodb://localhost:27017/dcm"
 #     UPLOAD_FOLDER = "/scor-data/"
-    UPLOAD_FOLDER = "c:/scor-data/"
+    UPLOAD_FOLDER = "/scor-data/"
     MONGO_URI = "mongodb://dcm-consmos:pUQRAZMYnTiYikWTxjcq7zQch27litMHCSJnHOu9XCssYxBqVRWmMpd8sSnd0G7w66dQ7GMS4UK8iAvOsoBGtw==@dcm-consmos.mongo.cosmos.azure.com:10255/dcm?ssl=true&replicaSet=globaldb&retrywrites=false&maxIdleTimeMS=120000&appName=@dcm-consmos@"
 
 
