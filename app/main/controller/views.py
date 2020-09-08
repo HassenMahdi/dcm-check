@@ -39,10 +39,9 @@ class CheckingData(Resource):
 
                 return jsonify(result)
 
-            except Exception:
+            except Exception as exp:
+                print(exp)
                 print('CHECK FAILED')
-                print(str(traceback.format_stack()))
-                traceback.print_exc()
 
                 return response_with(resp.SERVER_ERROR_500)
 
@@ -63,9 +62,9 @@ class ChecksMetadata(Resource):
 
             return jsonify(job_metadata)
 
-        except Exception:
+        except Exception as exp:
+            print(exp)
             print('CHECK FAILED')
-            print(str(traceback.format_stack()))
             traceback.print_exc()
 
             return response_with(resp.SERVER_ERROR_500)
@@ -131,9 +130,9 @@ class Exposures(Resource):
 
                 return jsonify(exposures)
 
-            except Exception:
+            except Exception as exp:
+                print(exp)
                 print('DATA FAILED')
-                print(str(traceback.format_stack()))
                 traceback.print_exc()
 
             return response_with(resp.SERVER_ERROR_500)
