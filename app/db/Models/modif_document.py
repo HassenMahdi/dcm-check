@@ -23,10 +23,10 @@ class Modifications:
 
     def __init__(self, obj, worksheet=None,domain_id=None):
         obj = obj or {}
-        self.worksheet_id = obj.get("worksheet_id") or worksheet
+        self.worksheet_id = obj.get("worksheet_id", None) or worksheet
         self.domain_id=domain_id
-        self.columns = obj.get("columns") or self.columns
-        self._id = obj.get("_id") or None
+        self.columns = obj.get("columns", None) or self.columns
+        self._id = obj.get("_id", None) or None
 
     def to_dict(self):
         return {
