@@ -10,7 +10,7 @@ class ModificationsDocument:
         return m
 
     def save(self, m, **kwargs):
-        document= m.to_dict()
+        document = m.to_dict()
         document['_id'] = document.get('_id', None) or generate_id()
         return mongo.db.modifications.save(document)
 

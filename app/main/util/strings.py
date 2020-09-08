@@ -7,4 +7,4 @@ def camelCase(st):
 
 
 def generate_id():
-    uuid.uuid4().hex.upper()
+    return uuid.uuid4().hex.upper()
