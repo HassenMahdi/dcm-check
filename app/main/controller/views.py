@@ -143,7 +143,7 @@ class CheckModifications(Resource):
     @api.doc(params=get_request_param)
     def get(self):
         try:
-            params = {param: request.args.get(param) for param in ["worksheetId", "domainId"]}
+            params = request.get_json()
 
             modifications = get_check_modifications(params["worksheetId"], params["domainId"])
 
