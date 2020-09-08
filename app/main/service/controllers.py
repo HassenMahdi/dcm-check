@@ -175,9 +175,9 @@ def read_result(params,data):
     check_results = {"count": 0, "errors": {}, "warnings": {}}
 
     try:
-        path = get_results_path(params["filename"], params["worksheet"], as_folder=False, create=True)
+        # path = get_results_path(params["filename"], params["worksheet"], as_folder=False, create=True)
 
-        dff = pd.read_csv(path, engine="c", dtype=str, skipinitialspace=True, na_filter=False, delimiter=";")
+        dff = get_check_results_df(params["filename"], params["worksheet"])
 
         df= dff.iloc[data.index]
 

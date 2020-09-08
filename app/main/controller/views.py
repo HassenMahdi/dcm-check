@@ -40,6 +40,7 @@ class CheckingData(Resource):
 
             except Exception as exp:
                 print(exp)
+                traceback.print_exc()
                 print('CHECK FAILED')
 
                 return response_with(resp.SERVER_ERROR_500)

@@ -13,7 +13,7 @@ def run_checks(final_df, params, target_fields, metadata=True,modifs=[]):
     """Runs all the checks defined for all targets in a given mappings document"""
 
     total_errors_lines = 0
-    result_df = pd.DataFrame()
+    result_df = pd.DataFrame(index=final_df.index)
     unique_errors_lines = set()
     check_empty_df = final_df.isin(["", np.nan, "NaN"])
     #TODO: change reslut model
