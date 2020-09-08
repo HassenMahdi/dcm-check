@@ -1,13 +1,17 @@
 from app.db.connection import mongo
+from app.main.util.strings import generate_id
+
 
 class ModificationsDocument:
+    _id = None
 
     def get(self,worksheet,domain_id):
-        m = Modifications(mongo.db.modifications.find_one({'worksheet_id': worksheet,'domain_id':domain_id}), worksheet=worksheet,domain_id=domain_id)
+        m = Modifications(mongo.db.modifications.find_one({'worksheet_id': worksheet}), worksheet=worksheet,domain_id=domain_id)
         return m
 
     def save(self, m, **kwargs):
         document= m.to_dict()
+        document['_id'] = document.get('_id', None) or generate_id()
         return mongo.db.modifications.save(document)
 
 
