@@ -3,7 +3,6 @@ from app.main.util.strings import generate_id
 
 
 class ModificationsDocument:
-    _id = None
 
     def get(self,worksheet,domain_id):
         m = Modifications(mongo.db.modifications.find_one({'worksheet_id': worksheet}), worksheet=worksheet,domain_id=domain_id)

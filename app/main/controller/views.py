@@ -40,6 +40,8 @@ class CheckingData(Resource):
                 return jsonify(result)
 
             except Exception:
+                print('CHECK FAILED')
+                print(str(traceback.format_exception()))
                 traceback.print_exc()
 
                 return response_with(resp.SERVER_ERROR_500)
@@ -52,13 +54,21 @@ class ChecksMetadata(Resource):
     @api.doc("Returns the data check results metadata")
     @api.doc(params=get_req_params)
     def get(self):
-        param = request.args.get("job_id")
+        try:
+            param = request.args.get("job_id")
 
-        job_result_document = JobResultDocument()
-        job_metadata = job_result_document.get_data_check_job(param)
-        del job_metadata["_id"]
+            job_result_document = JobResultDocument()
+            job_metadata = job_result_document.get_data_check_job(param)
+            del job_metadata["_id"]
 
-        return jsonify(job_metadata)
+            return jsonify(job_metadata)
+
+        except Exception:
+            print('CHECK FAILED')
+            print(str(traceback.format_exception()))
+            traceback.print_exc()
+
+            return response_with(resp.SERVER_ERROR_500)
 
 
 
@@ -122,7 +132,8 @@ class Exposures(Resource):
                 return jsonify(exposures)
 
             except Exception:
-
+                print('DATA FAILED')
+                print(str(traceback.format_exception()))
                 traceback.print_exc()
 
             return response_with(resp.SERVER_ERROR_500)
