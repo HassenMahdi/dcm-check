@@ -10,7 +10,10 @@ class ModifierService:
         """ search by filename worksheet and domain id """
         for key in modifications.columns.keys():
            for row_index, value in modifications.columns[key].items():
-                df[key][int(row_index)]= value
+               if key in df.columns and int(row_index) in df.index:
+                    df[key][int(row_index)]= value
+               else:
+                   print(f'{key} not found in df')
 
         return df
 
@@ -21,7 +24,10 @@ class ModifierService:
 
                 for key in modifications.columns.keys():
                     for row_index, value in modifications.columns[key].items():
-                        df[key][int(row_index)] = value
+                        if key in df.columns and int(row_index) in df.index:
+                            df[key][int(row_index)] = value
+                        else:
+                            print(f'{key} not found in df')
                 return df
         else:
             return df
