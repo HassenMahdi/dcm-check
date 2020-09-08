@@ -13,6 +13,14 @@ class ModificationsDocument:
         document['_id'] = document.get('_id', None) or generate_id()
         return mongo.db.modifications.save(document)
 
+    def get_target_label(self, name, domain_id):
+        """Fetches the field label based on the name"""
+
+        fields_collection = mongo.db[f"{domain_id}.fields"]
+
+        return fields_collection.find_one({"name": name})["label"]
+
+
 
 class Modifications:
     worksheet_id = None
