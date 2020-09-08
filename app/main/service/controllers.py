@@ -9,7 +9,8 @@ from app.main.service.filter_service import update_table
 from app.main.service.modification_service import ModifierService
 from app.main.util.paginator import Paginator
 from app.main.service.cleansing_service import run_checks, check_modifications
-from  app.db.Models.checker_documents import CheckerDocument, JobResultDocument
+from app.db.Models.checker_documents import CheckerDocument, JobResultDocument
+from app.db.Models.modif_document import ModificationsDocument
 from app.main.util.storage import get_mapped_df, get_imported_data_df, save_mapped_df, save_check_results_df, \
     get_check_results_df, get_mapping_path, get_results_path
 
@@ -210,3 +211,17 @@ def to_float(column):
     """Converts a column of type np numeric to float"""
     return float(column)
 
+
+def get_check_modifications(worksheet_id, domain_id):
+    """Fetches the check modification data"""
+
+    modifications = {}
+    modif_document = ModificationsDocument()
+
+    modified_data = modif_document.get(worksheet_id, domain_id).to_dict()["columns"]
+
+    for column in modified_data:
+        column_label = modif_document.get_target_label(column, domain_id)
+        modifications[column_label] = modified_data[column] 
+
+    return modifications
