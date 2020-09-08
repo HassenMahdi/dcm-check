@@ -6,15 +6,14 @@ import traceback
 from flask import request, jsonify
 from flask_restx import Resource, Namespace, fields
 
-from  app.main.util import responses as resp
+from app.main.util import responses as resp
 from app.main.util.responses import response_with
-from app.main.service.controllers import start_check_job, read_exposures, read_column
+from app.main.service.controllers import start_check_job, read_exposures, read_column, get_check_modifications
 
-    
 from app.db.Models.checker_documents import JobResultDocument, CheckerDocument
 
-api = Namespace('data check', description='checks')
 
+api = Namespace('data check', description='checks')
 
 
 @api.route('')
@@ -61,11 +60,6 @@ class ChecksMetadata(Resource):
         return jsonify(job_metadata)
 
 
-
-
-
-
-
 @api.route('/headers')
 class DataGridHeaders(Resource):
     # TODO: change reslut model
@@ -82,7 +76,6 @@ class DataGridHeaders(Resource):
         return jsonify(headers)
 
 
-
 @api.route('/read-column/')
 class ColumnReader(Resource):
     get_req_params = {"filename": "Excel file name", "worksheet": "Worksheet name", "column": "column code",
@@ -95,6 +88,7 @@ class ColumnReader(Resource):
 
         return read_column(params)
         
+
 @api.route('/data')
 class Exposures(Resource):
     get_request_param ={"filename": "Excel file name", "worksheet": "Worksheet name", "page": "The page number",
@@ -128,13 +122,24 @@ class Exposures(Resource):
             return response_with(resp.SERVER_ERROR_500)
 
 
+@api.route('/modifications')
+class CheckModifications(Resource):
 
+    get_request_param ={"worksheetId": "The worksheet created Id", "domainId": "The Domain Id"}
 
+    @api.doc("Get all check modification data")
+    @api.doc(params=get_request_param)
+    def get(self):
+        try:
+            params = {param: request.args.get(param) for param in ["worksheetId", "domainId"]}
 
+            modifications = get_check_modifications(params["worksheetId"], params["domainId"])
 
+            return(jsonify(modifications))
 
-
-
+        except: 
+            traceback.print_exc()
+            return response_with(resp.SERVER_ERROR_500)
 
 
 
