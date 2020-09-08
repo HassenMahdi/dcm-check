@@ -137,17 +137,12 @@ class Exposures(Resource):
 @api.route('/modifications')
 class CheckModifications(Resource):
 
-    get_request_param ={"worksheetId": "The worksheet created Id", "domainId": "The Domain Id"}
-
     @api.doc("Get all check modification data")
-    @api.doc(params=get_request_param)
-    def get(self):
+    def post(self):
         try:
             params = request.get_json()
-
             modifications = get_check_modifications(params["worksheetId"], params["domainId"])
-
-            return(jsonify(modifications))
+            return jsonify(modifications)
 
         except: 
             traceback.print_exc()
