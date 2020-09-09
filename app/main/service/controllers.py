@@ -115,7 +115,7 @@ def start_check_job(params, modifications={}):
         start = time.time()
         df = get_imported_data_df(params["filename"], params["worksheet"], nrows=None, skiprows=None,isTransformed=isTransformed)
         final_df = apply_mapping_transformation(df, params, target_fields)
-        #final_df = modifier.applys(params["worksheet"], params["domain_id"], final_df)
+        final_df = modifier.applys(params["worksheet"], params["domain_id"], final_df)
         save_mapped_df(final_df, params["filename"], params["worksheet"])
         print("end mapping")
         print(time.time() - start)
