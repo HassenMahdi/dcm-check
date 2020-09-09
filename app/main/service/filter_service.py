@@ -44,6 +44,7 @@ def split_filter_part(filter_part):
 
 def update_table(params,path,page_current, page_size, sort_by, filter):
     modifier = ModifierService()
+
     df= pd.read_csv(path, engine="c", dtype=str, skipinitialspace=True, na_filter=False, delimiter=";")
     filtering_expressions = filter.split(' && ')
     dff = modifier.applys(params["worksheet"], params["domain_id"], df)
