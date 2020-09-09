@@ -26,13 +26,13 @@ class Modifications:
     worksheet_id = None
     domain_id = None
     _id = None
-    columns = {}
+    columns = None
 
     def __init__(self, obj, worksheet=None,domain_id=None):
         obj = obj or {}
         self.worksheet_id = obj.get("worksheet_id", None) or worksheet
         self.domain_id=domain_id
-        self.columns = obj.get("columns", None) or self.columns
+        self.columns = obj.get("columns", None) or {}
         self._id = obj.get("_id", None) or None
 
     def to_dict(self):
