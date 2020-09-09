@@ -141,7 +141,9 @@ class CheckModifications(Resource):
     def post(self):
         try:
             params = request.get_json()
+            print(params)
             modifications = get_check_modifications(params["worksheetId"], params["domainId"])
+            print(modifications)
             return jsonify(modifications)
 
         except: 
