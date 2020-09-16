@@ -30,7 +30,7 @@ def apply_mapping_transformation(df, params, target_fields):
     transformed_df = pd.DataFrame(columns=target_fields_names)
     default_values = checker_document.get_default_values(params["domain_id"])
     mappings = checker_document.get_mappings(params["mappingId"])
-
+    print('APPLYING MAPPING')
     for target, source in mappings.items():
         data_type = target_fields[target]["type"]
         remove_digits = target_fields[target].get("skipDecimalDigits",None)
@@ -58,10 +58,12 @@ def apply_mapping_transformation(df, params, target_fields):
     #for field_code, formula in formulas.items():
     #   transformed_df[field_code] = calculate_field(transformed_df, formula, mappings, formulas)
 
+    print('APPLIED MAPPING')
     if default_values:
         for target_field, default_value in default_values.items():
             transformed_df[target_field] = transformed_df[target_field].fillna("").replace("", default_value)
 
+    print('APPLIED TRANSFORM')
     return transformed_df
 
 
@@ -114,6 +116,7 @@ def start_check_job(params, modifications={}):
     else:
         start = time.time()
         df = get_imported_data_df(params["filename"], params["worksheet"], nrows=None, skiprows=None,isTransformed=isTransformed)
+        print('READ DATAFRAME')
         final_df = apply_mapping_transformation(df, params, target_fields)
         #final_df = modifier.applys(params["worksheet"], params["domain_id"], final_df)
         save_mapped_df(final_df, params["filename"], params["worksheet"])
