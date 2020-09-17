@@ -1,39 +1,27 @@
 import os
-import unittest
 
-from flask_migrate import Migrate, MigrateCommand
-from flask_script import Manager
+from flask import Flask
+from flask_cors import CORS
 
-from app import check_bp
-from app.main import create_app, db
-from app.main.model import user, blacklist
-
-app = create_app(os.getenv('BOILERPLATE_ENV') or 'dev')
-app.register_blueprint(check_bp)
-
-app.app_context().push()
-
-manager = Manager(app)
-
-migrate = Migrate(app, db)
-
-manager.add_command('db', MigrateCommand)
+from config import config_by_name
+from api import check_bp
+from database.connectors import mongo
 
 
-@manager.command
-def run():
-    app.run()
+def create_app(config_name):
+    """Creates the flask app and initialize its component"""
+
+    app = Flask(__name__)
+    app.config.from_object(config_by_name[config_name])
+    CORS(app)
+    mongo.init_app(app)
+    app.register_blueprint(check_bp)
+
+    return app
 
 
-@manager.command
-def test():
-    """Runs the unit tests."""
-    tests = unittest.TestLoader().discover('app/test', pattern='test*.py')
-    result = unittest.TextTestRunner(verbosity=2).run(tests)
-    if result.wasSuccessful():
-        return 0
-    return 1
-
+app = create_app(os.getenv('DEPLOY_ENV') or 'dev')
 
 if __name__ == '__main__':
-    manager.run()
+    app.run(port=5000, debug=True)
+
