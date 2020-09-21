@@ -7,7 +7,7 @@ from flask import request, jsonify
 from flask_restx import Namespace, Resource, fields
 
 import api.utils.responses as resp 
-from api.controllers import start_check_job
+from api.controllers import start_check_job, read_exposures
 from database.checker_document import CheckerDocument
 
 
@@ -66,7 +66,7 @@ class DataGridHeaders(Resource):
             return jsonify(headers)
         except Exception:
             traceback.print_exc()
-            return response_with(resp.SERVER_ERROR_500)
+            return resp.response_with(resp.SERVER_ERROR_500)
 
 
 @check_namespace.route('/exposures/<file_id>/<worksheet_id>')
@@ -76,7 +76,7 @@ class DataPreview(Resource):
     
     sort = check_namespace.model('Sort', {
         "column": fields.String(required=True),
-        "direction": fields.String(required=True)
+        "order": fields.String(required=True)
     })
     column_filter = check_namespace.model('ColumnFilter', {
         "column": fields.String(required=True),
@@ -89,15 +89,16 @@ class DataPreview(Resource):
         "sort": fields.Nested(sort, required=False)
     })
     @check_namespace.doc("Get paginated exposures")
+    @check_namespace.doc(params=url_request_params)
     @check_namespace.expect(body_request_params)
-    def get(self, file_id, worksheet_id):
+    def post(self, file_id, worksheet_id):
         try:
-            page, nrows = (request.args.get(param) for param in ["page", "nrows"])
+            url_params = {param: request.args.get(param) for param in ["page", "nrows"]}
             params = request.get_json()
-            exposures = read_exposures(request.base_url, file_id, worksheet_id, page, nrows, params["is_transformed"],
+            exposures = read_exposures(request.base_url, file_id, worksheet_id, url_params, params["is_transformed"], 
                                        params["sort"], params["filter"])
 
-            return jsonify(500)
+            return jsonify(exposures)
         except Exception:
             traceback.print_exc()
-            return response_with(resp.SERVER_ERROR_500)
+            return resp.response_with(resp.SERVER_ERROR_500)

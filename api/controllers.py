@@ -9,9 +9,11 @@ from database.checker_document import CheckerDocument
 from database.job_result_document import JobResultDocument
 from database.modifier_document import ModifierDocument
 from services.cleansing_service import run_checks, check_modifications
-from api.utils.utils import create_check_metadata
+from services.dataframe import apply_filter, apply_sort
+from api.utils.paginator import Paginator
+from api.utils.utils import create_check_metadata, get_dataframe_page
 from api.utils.storage import get_imported_data_df, get_mapped_df, get_check_results_df, save_mapped_df, \
-                              save_check_results_df
+                              save_check_results_df, get_mapping_path
 
 
 def apply_mapping_transformation(df, mapping_id, target_fields):
@@ -87,7 +89,7 @@ def start_check_job(job_id, file_id, worksheet_id, mapping_id, domain_id, is_tra
     return job_result_document.save_check_job(data_check_result)
 
 
-def read_exposures(base_url, file_id, worksheet_id, page, nrows, is_transformed, sort, filters):
+def read_exposures(base_url, file_id, worksheet_id, url_params, is_transformed, sort, filters):
     """Gets paginated data, filters and sorts data"""
 
     if is_transformed:
@@ -95,7 +97,28 @@ def read_exposures(base_url, file_id, worksheet_id, page, nrows, is_transformed,
         file_id = transformed_path[-2]
         worksheet_id = transformed_path[-1]
 
+    indices = []
+    sort_indices = []
+    filter_indices = []
+    checker_document = CheckerDocument()
+
     if filters:
-        operators = {"gt": ">", "lt": "<", "gte": ">=", "lte": "=<", "eq": "=="}
-        mapped_df = get_mapped_df(file_id, workshhet_id, usecols=[column_filter["column"] for column_filter in filters])
-        
+        filter_indices = apply_filter(file_id, worksheet_id, filters)    
+
+    if sort:
+        sort_indices = apply_sort(file_id, worksheet_id, sort)
+        if filter_indices:
+            indices = [elem for elem in sort_indices if elem in filter_indices]
+    indices = indices if indices else sort_indices or filter_indices
+    total_lines = len(indices) if indices else checker_document.get_worksheet_length(worksheet_id)
+    
+    return get_dataframe_page(file_id, worksheet_id, base_url, url_params, total_lines, indices, sort)
+
+
+
+
+
+
+
+
+            

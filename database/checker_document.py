@@ -52,3 +52,10 @@ class CheckerDocument:
         domain_fields = fields_collection.find()
 
         return domain_fields
+
+    def get_worksheet_length(self, worksheet_id):
+        """Fetches a worksheet document to get its total lines"""
+
+        worksheet = mongo.db.worksheet_metadata
+
+        return worksheet.find_one({"worksheetId": worksheet_id}, {"_id": 0, "totalExposures": 1})["totalExposures"]
