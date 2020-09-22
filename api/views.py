@@ -9,6 +9,7 @@ from flask_restx import Namespace, Resource, fields
 import api.utils.responses as resp 
 from api.controllers import start_check_job, read_exposures
 from database.checker_document import CheckerDocument
+from database.job_result_document import JobResultDocument
 
 
 check_namespace = Namespace("data check")
@@ -99,6 +100,22 @@ class DataPreview(Resource):
                                        params["sort"], params["filter"])
 
             return jsonify(exposures)
+        except Exception:
+            traceback.print_exc()
+            return resp.response_with(resp.SERVER_ERROR_500)
+
+
+@check_namespace.route("/metadata/<job_id>")
+class ChecksMetadata(Resource):
+
+    @check_namespace.doc("Returns the data check results metadata")
+    def get(self, job_id):
+        try:
+            job_result_document = JobResultDocument()
+            job_metadata = job_result_document.get_data_check_job(job_id)
+            del job_metadata["_id"]
+
+            return jsonify(job_metadata)
         except Exception:
             traceback.print_exc()
             return resp.response_with(resp.SERVER_ERROR_500)
