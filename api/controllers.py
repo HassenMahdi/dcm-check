@@ -54,8 +54,9 @@ def start_check_job(job_id, file_id, worksheet_id, mapping_id, domain_id, is_tra
         result_df = get_check_results_df(file_id, worksheet_id)
         
         rows_indices = set()
-        for modification in modifications.values():
-            rows_indices.update(map(int, modification.keys()))
+        
+        rows_indices.update(map(int, modifications.keys()))
+        print(rows_indices)
         nrows = len(rows_indices)
         skiprows = set(range(1, max(rows_indices) + 1)) - set([index +1 for index in rows_indices])
 
@@ -113,12 +114,3 @@ def read_exposures(base_url, file_id, worksheet_id, url_params, is_transformed, 
     total_lines = len(indices) if indices else checker_document.get_worksheet_length(worksheet_id)
     
     return get_dataframe_page(file_id, worksheet_id, base_url, url_params, total_lines, indices, sort)
-
-
-
-
-
-
-
-
-            

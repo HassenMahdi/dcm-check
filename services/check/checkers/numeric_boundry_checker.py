@@ -8,7 +8,7 @@ from services.check.checkers.checker import Checker
 
 class NumericBoundryChecker(Checker):
 
-    check_code = "NUMERIC_BOUNDRY"
+    check_code = "NUMERIC_BOUNDRY_CHECK"
     check_name = "Numeric Boundry Value Check"
     check_message = "The field %s is not in %s ."
     check_level = "errors"

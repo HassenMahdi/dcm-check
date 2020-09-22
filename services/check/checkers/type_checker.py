@@ -5,7 +5,7 @@ from services.check.checkers.checker import Checker
 
 
 class TypeChecker(Checker):
-    check_code = "TYPE"
+    check_code = "TYPE_CHECK"
     check_name = "type"
     check_message = "The field %s is not correct %s value."
     check_level = "errors"

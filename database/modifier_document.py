@@ -6,12 +6,12 @@ from database.connectors import mongo
 
 class ModifierDocument:
 
-    def get_modifications(self, worksheet_id):
+    def get_modifications(self, worksheet_id, line):
         """Fetches a modification document from check_modifcation collection"""
 
         check_modification = mongo.db.modifications
 
-        modification = check_modification.find_one({"worksheetId": worksheet_id}, projection=["columns"])
+        modification = check_modification.find_one({"worksheetId": worksheet_id, "line": line}, projection=["columns"])
 
         return modification
 
@@ -19,28 +19,38 @@ class ModifierDocument:
         """Saves the check modifications in modifications collection"""
 
         check_modification = mongo.db.modifications
-        exist_modification = self.get_modifications(worksheet_id)
-        if exist_modification:
-            exist_modification = self.update_modification(modifications, exist_modification["columns"])
-            check_modification.update_one(
+
+        to_insert = []
+        modifications = {int(line): modification for line, modification in modifications.items()}
+        for line, modification in modifications.items():
+            exist_modification = self.get_modifications(worksheet_id, line)
+            if exist_modification:
+                exist_modification = self.update_modification(modification, exist_modification["columns"])
+                check_modification.update_one(
                     {'worksheetId': worksheet_id},
                     {'$set': {
                         "columns": exist_modification
                     }
                     }, upsert=False
                 )
-        else:
-            check_modification.insert_one({"worksheetId": worksheet_id, "columns": modifications})
+            else:
+                modif = {column: {"previous": [modification[column]["previous"]], "new": modification[column]["new"]}
+                         for column in modification}
+                to_insert.append({"worksheetId": worksheet_id, "line": line, "columns": modif})
+        if to_insert:
+            check_modification.insert_many(to_insert, ordered=False)
 
-    def update_modification(self, modifications, exist_modification):
+    def update_modification(self, line_modification, exist_modification):
         """Updates an existent column modification"""
 
-        for column, modification in modifications.items():
+        for column, modification in line_modification.items():
             if exist_modification.get(column):
-                for line, content in modification.items():
-                    exist_modification.get(column)[line] = modification[line]
+                exist_modification.get(column)["previous"].append(modification["previous"])
+                exist_modification.get(column)["new"] = modification["new"]
+            
             else:
-                exist_modification[column] = modification
+                modif = {"previous" : [modification["previous"]], "new": modification["new"]}
+                exist_modification[column] = modif
 
         return exist_modification
 
@@ -49,13 +59,16 @@ class ModifierDocument:
 
         check_modification = mongo.db.modifications
 
-        exist_modifications = self.get_modifications(worksheet_id)
-        if exist_modifications:
-            if is_all:
-                indices = range(0, df.shape[0])
-            
-            for column, modification in exist_modifications["columns"].items():
-                for line, content in modification.items():
-                    if int(line) in indices:
-                        df.loc[int(line)][column] = content
-
+        if is_all:
+            exist_modification = check_modification.find({"worksheetId": worksheet_id}, projection=["line", "columns"])
+            for modification_document in exist_modification:
+                for column, modification in modification_document["columns"].items():
+                    if df.get(column) is not None:
+                        df.loc[modification_document["line"]][column] = modification["new"]
+        else:
+            for line in indices:
+                exist_content = self.get_modifications(worksheet_id, line)
+                if exist_content:
+                    for column, modification in exist_content["columns"].items():
+                        if df.get(column) is not None:
+                            df.loc[line][column] = modification["new"]

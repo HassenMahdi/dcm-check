@@ -6,7 +6,7 @@ from services.check.checkers.checker import Checker
 
 
 class ReferenceChecker(Checker):
-    check_code = "REF"
+    check_code = "REFERENCE_CHECK"
     check_name = "reference"
     check_message = "The field %s is not in the %s reference"
     check_level = "errors"

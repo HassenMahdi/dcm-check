@@ -25,7 +25,7 @@ def run_checks(final_df, target_fields, data_check_result, metadata=True):
         error_lines_per_field = []
 
         if (field_type != "string") and (not empty_column.all()):
-            checker = CheckerFactory.get_checker("TYPE")
+            checker = CheckerFactory.get_checker("TYPE_CHECK")
             type_check = checker.run(final_df, field_code, empty_column, field_type=field_type)
             if type_check is not None:
                 print("TYPE")
