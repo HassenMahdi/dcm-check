@@ -108,7 +108,6 @@ class Paginator:
                                 nrows=nrows,
                                 delimiter=';')
         modifier_document = ModifierDocument()
-        print(exposures)
         exposures.index = indices
         modifier_document.apply_modifications(exposures, worksheet_id, indices=indices)
         end = time.time()
@@ -128,7 +127,7 @@ class Paginator:
             "last_page": self.last_page,
             "total": self.total,
             "count": len(data),
-            "exposures": data.to_dict(orient='records')
+            "data": data.to_dict(orient='records')
         }
 
         exposures = paginated_response["exposures"]

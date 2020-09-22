@@ -112,5 +112,40 @@ def read_exposures(base_url, file_id, worksheet_id, url_params, is_transformed, 
             indices = [elem for elem in sort_indices if elem in filter_indices]
     indices = indices if indices else sort_indices or filter_indices
     total_lines = len(indices) if indices else checker_document.get_worksheet_length(worksheet_id)
+    preview = get_dataframe_page(file_id, worksheet_id, base_url, url_params, total_lines, indices, sort)
     
-    return get_dataframe_page(file_id, worksheet_id, base_url, url_params, total_lines, indices, sort)
+    if preview.get("absolute_index"):
+        preview["results"] = read_result(file_id, worksheet_id, preview["absolute_index"])
+    else:
+        preview["results"] = read_result(file_id, worksheet_id, preview["index"])
+    
+    return preview
+
+
+def read_result(file_id, worksheet_id, index):
+    """Reads the data check result file"""
+
+    result = {}
+    try:
+        result_df = get_check_results_df(file_id, worksheet_id)
+        result_df= result_df.iloc[index]
+        result = {}    
+        for column in result_df.columns.values:
+            count = 0
+            error = {}
+            indexes = result_df.index[result_df[column] == True].tolist()
+            check_type, field_code, error_type = eval(column)           
+            for index in result_df.index:
+                if index in indexes:
+                    target = result.setdefault(count, {})
+                    target = target.setdefault(field_code, {})
+                    target = target.setdefault(error_type, [])
+                    target.append(check_type)
+                else:
+                    result.setdefault(count, {})
+                count = count + 1
+        print(result)
+        return result
+
+    except pd.errors.EmptyDataError:
+        return result
