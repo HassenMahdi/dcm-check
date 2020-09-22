@@ -130,7 +130,7 @@ class Paginator:
             "data": data.to_dict(orient='records')
         }
 
-        exposures = paginated_response["exposures"]
+        exposures = paginated_response["data"]
         if isinstance(exposures, dict) and "index" in exposures:
             del exposures["index"]
 

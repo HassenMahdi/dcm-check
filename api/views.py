@@ -19,12 +19,16 @@ check_namespace = Namespace("data check")
 class CheckingData(Resource):
     
     content = check_namespace.model('Content', {
-        'line': fields.Integer(required=True),
-        "value": fields.String(required=True)
+        'previous': fields.String(required=True),
+        "new": fields.String(required=True)
 })
-    modification = check_namespace.model("Modification", {
+    column_modification = check_namespace.model("ColumnModification", {
         "column": fields.String(required=True),
-        "modifications": fields.Nested(content, required=True)
+        "content": fields.Nested(content, required=True)
+    })
+    modifications = check_namespace.model("Modifications", {
+        "line": fields.String(required=True),
+        "line_modification": fields.Nested(column_modification, required=True)
     })
     post_request_body = check_namespace.model("CheckingData", {
         "job_id": fields.String(required=False),
@@ -33,7 +37,7 @@ class CheckingData(Resource):
         "mapping_id": fields.String(required=True),
         "domain_id": fields.String(required=True),
         "is_transformed": fields.Boolean(default=False, required=True),
-        "modifications": fields.Nested(modification, required=False)
+        "modifications": fields.Nested(modifications, required=False)
     })
 
     @check_namespace.doc("Check the data health")
@@ -70,7 +74,7 @@ class DataGridHeaders(Resource):
             return resp.response_with(resp.SERVER_ERROR_500)
 
 
-@check_namespace.route('/exposures/<file_id>/<worksheet_id>')
+@check_namespace.route('/data')
 class DataPreview(Resource):
 
     url_request_params = {"page": "The page number", "nrows": "Number of rows to preview"}
@@ -85,6 +89,8 @@ class DataPreview(Resource):
         "value": fields.String(required=True)
     })
     body_request_params = check_namespace.model("DataPreview", {
+        "file_id": fields.String(required=True),
+        "worksheet_id": fields.String(required=True),
         "is_transformed": fields.Boolean(required=True),
         "filter": fields.List(fields.Nested(column_filter, required=True), required=False),
         "sort": fields.Nested(sort, required=False)
@@ -92,12 +98,12 @@ class DataPreview(Resource):
     @check_namespace.doc("Get paginated exposures")
     @check_namespace.doc(params=url_request_params)
     @check_namespace.expect(body_request_params)
-    def post(self, file_id, worksheet_id):
+    def post(self):
         try:
             url_params = {param: request.args.get(param) for param in ["page", "nrows"]}
             params = request.get_json()
-            exposures = read_exposures(request.base_url, file_id, worksheet_id, url_params, params["is_transformed"], 
-                                       params["sort"], params["filter"])
+            exposures = read_exposures(request.base_url, params["file_id"], params["worksheet_id"], url_params, 
+                                       params["is_transformed"], params["sort"], params["filter"])
 
             return jsonify(exposures)
         except Exception:
