@@ -144,8 +144,27 @@ def read_result(file_id, worksheet_id, index):
                 else:
                     result.setdefault(count, {})
                 count = count + 1
-        print(result)
+
         return result
 
     except pd.errors.EmptyDataError:
         return result
+
+
+def get_check_modifications(worksheet_id):
+    """Fetches the check modification data"""
+
+    audit_trial = {}
+    modifier_document = ModifierDocument()
+
+    modified_data = modifier_document.get_modifications(worksheet_id, is_all=True)
+    for modification in modified_data:
+        for column, col_modif in modification["columns"].items():
+            line_modif = {"previous": col_modif["previous"], "new": col_modif["new"]}
+            if audit_trial.get(column):
+                audit_trial[column][modification["line"]] = line_modif
+            else:
+                audit_trial[column] = {}
+                audit_trial[column][modification["line"]] = line_modif 
+
+    return audit_trial

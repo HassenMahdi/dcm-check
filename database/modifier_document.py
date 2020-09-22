@@ -6,14 +6,15 @@ from database.connectors import mongo
 
 class ModifierDocument:
 
-    def get_modifications(self, worksheet_id, line):
+    def get_modifications(self, worksheet_id, line=None, is_all=False):
         """Fetches a modification document from check_modifcation collection"""
 
         check_modification = mongo.db.modifications
 
-        modification = check_modification.find_one({"worksheetId": worksheet_id, "line": line}, projection=["columns"])
-
-        return modification
+        if is_all:
+            return check_modification.find({"worksheetId": worksheet_id})
+        else:
+            return check_modification.find_one({"worksheetId": worksheet_id, "line": line}, projection=["columns"])
 
     def save_modifications(self, worksheet_id, modifications):
         """Saves the check modifications in modifications collection"""
@@ -60,7 +61,7 @@ class ModifierDocument:
         check_modification = mongo.db.modifications
 
         if is_all:
-            exist_modification = check_modification.find({"worksheetId": worksheet_id}, projection=["line", "columns"])
+            exist_modification = self.get_modifications(worksheet_id, is_all=is_all)
             for modification_document in exist_modification:
                 for column, modification in modification_document["columns"].items():
                     if df.get(column) is not None:

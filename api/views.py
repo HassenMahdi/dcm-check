@@ -7,7 +7,7 @@ from flask import request, jsonify
 from flask_restx import Namespace, Resource, fields
 
 import api.utils.responses as resp 
-from api.controllers import start_check_job, read_exposures
+from api.controllers import start_check_job, read_exposures, get_check_modifications
 from database.checker_document import CheckerDocument
 from database.job_result_document import JobResultDocument
 
@@ -117,5 +117,24 @@ class ChecksMetadata(Resource):
 
             return jsonify(job_metadata)
         except Exception:
+            traceback.print_exc()
+            return resp.response_with(resp.SERVER_ERROR_500)
+
+
+@check_namespace.route('/audit-trial')
+class CheckModifications(Resource):
+
+    body_request_params = check_namespace.model("AuditTrial", {
+        "worksheet_id": fields.String(required=True)
+    })
+    @check_namespace.doc("Get all check modification data")
+    @check_namespace.expect(body_request_params)
+    def post(self):
+        try:
+            worksheet_id = request.get_json()["worksheet_id"]
+            modifications = get_check_modifications(worksheet_id)
+            return jsonify(modifications)
+
+        except: 
             traceback.print_exc()
             return resp.response_with(resp.SERVER_ERROR_500)
