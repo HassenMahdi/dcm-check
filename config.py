@@ -18,7 +18,7 @@ class DevelopmentConfig(Config):
     """Dev config settings"""
 
     DEBUG = True
-    UPLOAD_FOLDER = "/home/dexter/uploads/"
+    UPLOAD_FOLDER = "/scor-data/"
     MONGO_URI = "mongodb://dcm-consmos" \
                 ":pUQRAZMYnTiYikWTxjcq7zQch27litMHCSJnHOu9XCssYxBqVRWmMpd8sSnd0G7w66dQ7GMS4UK8iAvOsoBGtw==@dcm" \
                 "-consmos.mongo.cosmos.azure.com:10255/dcm?ssl=true&replicaSet=globaldb&retrywrites=false" \
