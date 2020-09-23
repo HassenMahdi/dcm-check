@@ -54,7 +54,8 @@ class CheckingData(Resource):
                                          modifications=modifications)
 
                 return jsonify(result)
-            except Exception:
+            except Exception as exp:
+                print(exp)
                 traceback.print_exc()
                 return resp.response_with(resp.SERVER_ERROR_500)
 
@@ -69,7 +70,8 @@ class DataGridHeaders(Resource):
             headers = checker_document.get_headers(domain_id)
 
             return jsonify(headers)
-        except Exception:
+        except Exception as exp:
+            print(exp)
             traceback.print_exc()
             return resp.response_with(resp.SERVER_ERROR_500)
 
@@ -106,7 +108,8 @@ class DataPreview(Resource):
                                        params["is_transformed"], params["sort"], params["filter"])
 
             return jsonify(exposures)
-        except Exception:
+        except Exception as exp:
+            print(exp)
             traceback.print_exc()
             return resp.response_with(resp.SERVER_ERROR_500)
 
@@ -122,7 +125,8 @@ class ChecksMetadata(Resource):
             del job_metadata["_id"]
 
             return jsonify(job_metadata)
-        except Exception:
+        except Exception as exp:
+            print(exp)
             traceback.print_exc()
             return resp.response_with(resp.SERVER_ERROR_500)
 
@@ -141,6 +145,7 @@ class CheckModifications(Resource):
             modifications = get_check_modifications(worksheet_id)
             return jsonify(modifications)
 
-        except: 
+        except Exception as exp:
+            print(exp) 
             traceback.print_exc()
             return resp.response_with(resp.SERVER_ERROR_500)
