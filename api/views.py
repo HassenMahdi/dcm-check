@@ -23,12 +23,10 @@ class CheckingData(Resource):
         "new": fields.String(required=True)
 })
     column_modification = check_namespace.model("ColumnModification", {
-        "column": fields.String(required=True),
-        "content": fields.Nested(content, required=True)
+        "column": fields.Nested(content, required=True)
     })
     modifications = check_namespace.model("Modifications", {
-        "line": fields.String(required=True),
-        "line_modification": fields.Nested(column_modification, required=True)
+        "line": fields.Nested(column_modification, required=True)
     })
     post_request_body = check_namespace.model("CheckingData", {
         "job_id": fields.String(required=False),
@@ -37,6 +35,7 @@ class CheckingData(Resource):
         "mapping_id": fields.String(required=True),
         "domain_id": fields.String(required=True),
         "is_transformed": fields.Boolean(default=False, required=True),
+        "user_id": fields.String(required=True),
         "modifications": fields.Nested(modifications, required=False)
     })
 
@@ -46,12 +45,13 @@ class CheckingData(Resource):
         if request.method == 'POST':
             try:
                 params = {param: request.get_json().get(param) for param in ["job_id", "file_id", "worksheet_id",
-                                                                             "mapping_id", "domain_id", "is_transformed"]}                
+                                                                             "mapping_id", "domain_id", 
+                                                                             "is_transformed", "user_id"]}                
                 modifications = request.get_json().get("modifications") if params["job_id"] else None
 
                 result = start_check_job(params["job_id"], params["file_id"], params["worksheet_id"], 
                                          params["mapping_id"], params["domain_id"], params["is_transformed"],
-                                         modifications=modifications)
+                                         params["user_id"], modifications=modifications)
 
                 return jsonify(result)
             except Exception as exp:

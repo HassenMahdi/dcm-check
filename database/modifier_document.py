@@ -1,6 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+from datetime import datetime
+
 from database.connectors import mongo
 
 
@@ -16,7 +18,7 @@ class ModifierDocument:
         else:
             return check_modification.find_one({"worksheetId": worksheet_id, "line": line}, projection=["columns"])
 
-    def save_modifications(self, worksheet_id, modifications):
+    def save_modifications(self, worksheet_id, modifications, user_id):
         """Saves the check modifications in modifications collection"""
 
         check_modification = mongo.db.modifications
@@ -26,7 +28,7 @@ class ModifierDocument:
         for line, modification in modifications.items():
             exist_modification = self.get_modifications(worksheet_id, line)
             if exist_modification:
-                exist_modification = self.update_modification(modification, exist_modification["columns"])
+                exist_modification = self.update_modification(modification, exist_modification["columns"], user_id)
                 check_modification.update_one(
                     {'worksheetId': worksheet_id},
                     {'$set': {
@@ -35,22 +37,24 @@ class ModifierDocument:
                     }, upsert=False
                 )
             else:
-                modif = {column: {"previous": [modification[column]["previous"]], "new": modification[column]["new"]}
-                         for column in modification}
+                modif = {column: {"previous": [modification[column]["previous"]], "new": modification[column]["new"], 
+                         "updatedAt": datetime.now(), "userId": user_id} for column in modification}
                 to_insert.append({"worksheetId": worksheet_id, "line": line, "columns": modif})
         if to_insert:
             check_modification.insert_many(to_insert, ordered=False)
 
-    def update_modification(self, line_modification, exist_modification):
+    def update_modification(self, line_modification, exist_modification, user_id):
         """Updates an existent column modification"""
 
         for column, modification in line_modification.items():
             if exist_modification.get(column):
                 exist_modification.get(column)["previous"].append(modification["previous"])
                 exist_modification.get(column)["new"] = modification["new"]
-            
+                exist_modification.get(column)["userId"] = user_id
+                exist_modification.get(column)["updatedAt"] = datetime.now()
             else:
-                modif = {"previous" : [modification["previous"]], "new": modification["new"]}
+                modif = {"previous" : [modification["previous"]], "new": modification["new"], 
+                         "updatedAt": datetime.now(), "userId": user_id}
                 exist_modification[column] = modif
 
         return exist_modification

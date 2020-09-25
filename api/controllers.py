@@ -5,6 +5,7 @@ import time
 
 import pandas as pd
 
+from database.user_document import UserDocument
 from database.checker_document import CheckerDocument
 from database.job_result_document import JobResultDocument
 from database.modifier_document import ModifierDocument
@@ -37,7 +38,7 @@ def apply_mapping_transformation(df, mapping_id, target_fields):
     return transformed_df
 
 
-def start_check_job(job_id, file_id, worksheet_id, mapping_id, domain_id, is_transformed, modifications=None):
+def start_check_job(job_id, file_id, worksheet_id, mapping_id, domain_id, is_transformed, user_id, modifications=None):
     """Starts the data check service"""
 
     if is_transformed:
@@ -51,18 +52,16 @@ def start_check_job(job_id, file_id, worksheet_id, mapping_id, domain_id, is_tra
 
     start = time.time()
     if modifications:
-        result_df = get_check_results_df(file_id, worksheet_id)
-        
         rows_indices = set()
-        
         rows_indices.update(map(int, modifications.keys()))
         print(rows_indices)
         nrows = len(rows_indices)
         skiprows = set(range(1, max(rows_indices) + 1)) - set([index +1 for index in rows_indices])
 
+        result_df = get_check_results_df(file_id, worksheet_id)
         mapped_df = get_mapped_df(file_id, worksheet_id, nrows=nrows, skiprows=skiprows)
         mapped_df.index = rows_indices
-        modifier_document.save_modifications(worksheet_id, modifications)
+        modifier_document.save_modifications(worksheet_id, modifications, user_id)
         modifier_document.apply_modifications(mapped_df, worksheet_id, rows_indices)
         data_check_result = create_check_metadata(result_df.reset_index(), job_id, worksheet_id, mapping_id, domain_id)
         result_df = check_modifications(mapped_df, result_df, target_fields, data_check_result, modifications, rows_indices)
@@ -156,11 +155,13 @@ def get_check_modifications(worksheet_id):
 
     audit_trial = {}
     modifier_document = ModifierDocument()
-
+    user_document = UserDocument()
     modified_data = modifier_document.get_modifications(worksheet_id, is_all=True)
     for modification in modified_data:
         for column, col_modif in modification["columns"].items():
-            line_modif = {"previous": col_modif["previous"], "new": col_modif["new"]}
+            line_modif = {"previous": col_modif["previous"][-1], "new": col_modif["new"], 
+                          "updated_at": col_modif["updatedAt"],
+                          "user": user_document.get_user_fullname(col_modif["userId"])}
             if audit_trial.get(column):
                 audit_trial[column][modification["line"]] = line_modif
             else:
