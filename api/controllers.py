@@ -54,7 +54,6 @@ def start_check_job(job_id, file_id, worksheet_id, mapping_id, domain_id, is_tra
     if modifications:
         rows_indices = set()
         rows_indices.update(map(int, modifications.keys()))
-        print(rows_indices)
         nrows = len(rows_indices)
         skiprows = set(range(1, max(rows_indices) + 1)) - set([index +1 for index in rows_indices])
 

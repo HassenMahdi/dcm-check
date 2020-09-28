@@ -30,7 +30,7 @@ class ModifierDocument:
             if exist_modification:
                 exist_modification = self.update_modification(modification, exist_modification["columns"], user_id)
                 check_modification.update_one(
-                    {'worksheetId': worksheet_id},
+                    {'worksheetId': worksheet_id, "line": line},
                     {'$set': {
                         "columns": exist_modification
                     }
