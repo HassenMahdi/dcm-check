@@ -120,6 +120,8 @@ class Paginator:
         return exposures
 
     def get_paginated_response(self, data):
+
+        data["row_index"] = data.index.astype(int)
         paginated_response = {
             "_links": self.links,
             "current_page": self.page,
@@ -132,7 +134,7 @@ class Paginator:
 
         exposures = paginated_response["data"]
         if isinstance(exposures, dict) and "index" in exposures:
-            del exposures["index"]
+           del exposures["index"]
 
         end = self.limit + self.offset
         if end > self.total:
