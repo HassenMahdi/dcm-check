@@ -16,15 +16,14 @@ class ReferenceChecker(Checker):
         """Checks if a given column matches the business requirements"""
 
         if not empty_column.all():
-            reference = kwargs.get("check").get("ref")
-            list_values = reference.get("values")
-            ref_collection = reference.get("collection")
-            field_name = reference.get("fieldName")
-            condition = reference.get("conditions", {})
-
+            check = kwargs.get("check")
+            list_values = check.get("values")
             if list_values:
                 return empty_column | df[column].isin(list_values)
-            else:
-                checker_document = CheckerDocument()
-                ref_values = checker_document.get_ref_value(ref_collection, field_name, condition)
-                return empty_column | df[column].isin(ref_values)
+            
+            field_name = check.get("field_name")
+            conditions = check.get("conditions", {})
+            checker_document = CheckerDocument()
+            ref_values = checker_document.get_ref_value(conditions, field_name)
+
+            return empty_column | df[column].isin(ref_values)
