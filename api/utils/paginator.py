@@ -101,6 +101,7 @@ class Paginator:
 
         start = time.time()
         exposures = pd.read_csv(path,
+                                error_bad_lines=False,
                                 engine='c',
                                 dtype=str,
                                 na_filter=False,

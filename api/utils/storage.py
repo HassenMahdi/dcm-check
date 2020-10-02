@@ -46,7 +46,7 @@ def get_results_path(filename, worksheet, extension="pkl"):
 def get_dataframe_from_csv(path, nrows=None, skiprows=None, usecols=None, delimiter=";"):
     """Creates a dataframe from a csv file"""
 
-    df = pd.read_csv(path, engine="c", dtype=str, skipinitialspace=True, skiprows=skiprows, nrows=nrows,
+    df = pd.read_csv(path,error_bad_lines=False, engine="c", dtype=str, skipinitialspace=True, skiprows=skiprows, nrows=nrows,
                      usecols=usecols, na_filter=False, delimiter=";")
     return df
 
