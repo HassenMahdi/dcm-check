@@ -26,34 +26,37 @@ def run_checks(final_df, target_fields, data_check_result, metadata=True):
 
         if (field_type != "string") and (not empty_column.all()):
             checker = CheckerFactory.get_checker("TYPE_CHECK")
-            type_check = checker.run(final_df, field_code, empty_column, field_type=field_type)
-            if type_check is not None:
-                print("TYPE")
-                result_df = extend_result_df(result_df, type_check, checker.check_code, field_code,
-                                             checker.check_level)
-                if metadata:
-                    error_lines_per_field = final_df[field_code][type_check].index.tolist()
-                    total_errors_per_field = len(error_lines_per_field)
-                    if total_errors_per_field:
-                        total_errors_lines += total_errors_per_field
-                        unique_errors_lines.update(error_lines_per_field)
-                        data_check_result["jobResult"][field_code] = {"name": field_code,
-                                                                      "label": field_data["label"],
-                                                                      "errors": len(error_lines_per_field)}
+            # TODO REMOVE IF WHEN APP IS STABLE
+            if checker:
+                type_check = checker.run(final_df, field_code, empty_column, field_type=field_type)
+                if type_check is not None:
+                    print("TYPE")
+                    result_df = extend_result_df(result_df, type_check, checker.check_code, field_code,
+                                                 checker.check_level)
+                    if metadata:
+                        error_lines_per_field = final_df[field_code][type_check].index.tolist()
+                        total_errors_per_field = len(error_lines_per_field)
+                        if total_errors_per_field:
+                            total_errors_lines += total_errors_per_field
+                            unique_errors_lines.update(error_lines_per_field)
+                            data_check_result["jobResult"][field_code] = {"name": field_code,
+                                                                          "label": field_data["label"],
+                                                                          "errors": len(error_lines_per_field)}
 
         if data_check:
             for check in data_check:
                 checker = CheckerFactory.get_checker(check["type"])
-
-                check_result = checker.run(final_df, field_code, empty_column, check=check, field_type=field_type,
-                                           empty_df=check_empty_df)
-                if check_result is not None:
-                    print(check["type"])
-                    result_df = extend_result_df(result_df, check_result, checker.check_code, field_code,
-                                                 checker.check_level)
-                    if metadata:
-                        error_lines = final_df[field_code][check_result].index.tolist()
-                        error_lines_per_field = list(set().union(error_lines_per_field, error_lines, []))
+                # TODO REMOVE IF WHEN APP IS STABLE
+                if checker:
+                    check_result = checker.run(final_df, field_code, empty_column, check=check, field_type=field_type,
+                                               empty_df=check_empty_df)
+                    if check_result is not None:
+                        print(check["type"])
+                        result_df = extend_result_df(result_df, check_result, checker.check_code, field_code,
+                                                     checker.check_level)
+                        if metadata:
+                            error_lines = final_df[field_code][check_result].index.tolist()
+                            error_lines_per_field = list(set().union(error_lines_per_field, error_lines, []))
             print(len(error_lines_per_field))
             total_errors_per_field = len(error_lines_per_field)
             if total_errors_per_field:
