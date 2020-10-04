@@ -84,6 +84,10 @@ def check_modifications(final_df, result_df, target_fields, data_check_result, m
     if not modifications_result_df.empty:
         modifications_result_df.index = indices
 
+    # BUG WORKAROUND
+    # TODO WHEN CHECK IS USED 2 TIMES IN FIELD WE GET SAME COLUMN NAME FOR 2 INDIVIDUAL CHECKS
+    modifications_result_df = modifications_result_df.loc[:, ~modifications_result_df.columns.duplicated()]
+
     for column in modifications_result_df.columns.values:
         check_type, field_code, error_type = eval(column)
         check_column = pd.Series(data=False, index=range(0, result_df.shape[0]))
@@ -93,7 +97,7 @@ def check_modifications(final_df, result_df, target_fields, data_check_result, m
             result_df = extend_result_df(result_df, check_column, check_type,
                                          field_code, error_type)
         else:
-            result_df[column].loc[indices] = check_column
+            result_df[column].loc[indices] = check_column.loc[indices]
 
     update_data_check_metadata(data_check_result, result_df, modified_columns, modifications_result_df, target_fields,
                                indices)
@@ -104,6 +108,10 @@ def check_modifications(final_df, result_df, target_fields, data_check_result, m
 def update_data_check_metadata(data_check_result, result_df, modified_columns, modifications_result_df, target_fields,
                                indices):
     """Update a data check metadata dictionnary from result dataframe"""
+
+    # BUG WORKAROUND
+    # TODO WHEN CHECK IS USED 2 TIMES IN FIELD WE GET SAME COLUMN NAME FOR 2 INDIVIDUAL CHECKS
+    result_df = result_df.loc[:, ~result_df.columns.duplicated()]
 
     total_errors_lines = 0
     unique_errors_lines = set()
