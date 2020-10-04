@@ -131,7 +131,8 @@ def read_result(file_id, worksheet_id, index):
         for column in result_df.columns.values:
             count = 0
             error = {}
-            indexes = result_df.index[result_df[column] == True].tolist()
+            s_check_res=result_df[column]
+            indexes = s_check_res[s_check_res].index
             check_type, field_code, error_type = eval(column)           
             for index in result_df.index:
                 if index in indexes:
