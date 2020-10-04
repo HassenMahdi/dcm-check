@@ -20,7 +20,11 @@ class PropertyBoundryChecker(Checker):
             check = kwargs.get("check")
             operator = check.get("operator")
             boundry = check.get("property")
-            boundry_column = pd.to_numeric(df[boundry], errors='coerce')
-            column = pd.to_numeric(df[column], errors='coerce')
-            
-            return pd.eval(f"column {operator} boundry_column")
+
+            if boundry in df.columns:
+                boundry_column = pd.to_numeric(df[boundry], errors='coerce')
+                column = pd.to_numeric(df[column], errors='coerce')
+
+                return pd.eval(f"column {operator} boundry_column")
+            else:
+                return pd.Series(True, df.index)
