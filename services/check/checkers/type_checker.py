@@ -25,7 +25,7 @@ class TypeChecker(Checker):
         dict_format = {
             "double": "-?\d*(.?,?\d*)?",
             "boolean": "(yes)|(no)|(False)|(True)",
-            "date": "(\d{2})/(\d{2})/(\d{4})$",
+            "date": "^(\d{4})-(\d{2})-(\d{2})$",
             "integer": "-?\d*"
         }
 
