@@ -14,11 +14,11 @@ class EmptyChecker(Checker):
     def check_column(self, df, column, empty_column, *args, **kwargs):
         """Checks if a given column is empty"""
 
-        if empty_column.any():
-            related_fields = kwargs.get("check").get("rel")
-            if related_fields:
-                related_df = kwargs.get("empty_df")[related_fields]
-                for related_field in related_fields:
-                    empty_column = empty_column & ~related_df[related_field]
+        # if empty_column.any():
+        related_fields = kwargs.get("check").get("rel")
+        if related_fields:
+            related_df = kwargs.get("empty_df")[related_fields]
+            for related_field in related_fields:
+                empty_column = empty_column & ~related_df[related_field]
 
-            return empty_column == False
+        return empty_column == False

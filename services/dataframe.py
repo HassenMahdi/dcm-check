@@ -29,7 +29,6 @@ def reindex_result_df(df):
     return df
 
 
-
 def apply_filter(file_id, worksheet_id, filters):
     """Applies the filters on mapped_df for data preview"""
 

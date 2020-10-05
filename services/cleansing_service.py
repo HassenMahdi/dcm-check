@@ -30,7 +30,6 @@ def run_checks(final_df, target_fields, data_check_result, metadata=True):
             if checker:
                 type_check = checker.run(final_df, field_code, empty_column, field_type=field_type)
                 if type_check is not None:
-                    print("TYPE")
                     result_df = extend_result_df(result_df, type_check, checker.check_code, field_code,
                                                  checker.check_level)
                     if metadata:
@@ -84,11 +83,7 @@ def check_modifications(final_df, result_df, target_fields, data_check_result, m
     if not modifications_result_df.empty:
         modifications_result_df.index = indices
 
-    # BUG WORKAROUND
-    # TODO WHEN CHECK IS USED 2 TIMES IN FIELD WE GET SAME COLUMN NAME FOR 2 INDIVIDUAL CHECKS
-    modifications_result_df = modifications_result_df.loc[:, ~modifications_result_df.columns.duplicated()]
-
-    for column in modifications_result_df.columns.values:
+    for column in modifications_result_df.columns:
         check_type, field_code, error_type, check_index = eval(column)
         check_column = pd.Series(data=False, index=range(0, result_df.shape[0]))
         check_column.loc[indices] = modifications_result_df[column]
@@ -99,19 +94,17 @@ def check_modifications(final_df, result_df, target_fields, data_check_result, m
         else:
             result_df[column].loc[indices] = check_column.loc[indices]
 
+    # result_df = reindex_result_df(result_df)
+
     update_data_check_metadata(data_check_result, result_df, modified_columns, modifications_result_df, target_fields,
                                indices)
 
-    return reindex_result_df(result_df)
+    return result_df
 
 
 def update_data_check_metadata(data_check_result, result_df, modified_columns, modifications_result_df, target_fields,
                                indices):
     """Update a data check metadata dictionnary from result dataframe"""
-
-    # BUG WORKAROUND
-    # TODO WHEN CHECK IS USED 2 TIMES IN FIELD WE GET SAME COLUMN NAME FOR 2 INDIVIDUAL CHECKS
-    result_df = result_df.loc[:, ~result_df.columns.duplicated()]
 
     total_errors_lines = 0
     unique_errors_lines = set()
