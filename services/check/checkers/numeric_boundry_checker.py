@@ -22,4 +22,4 @@ class NumericBoundryChecker(Checker):
             operator = check.get("operator")
             df_column = pd.to_numeric(df[column], errors='coerce')
 
-            return pd.eval(f"df_column {operator} {operand}")
+            return eval(f"df_column {operator} {operand}")

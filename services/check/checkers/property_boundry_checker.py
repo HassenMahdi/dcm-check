@@ -25,6 +25,6 @@ class PropertyBoundryChecker(Checker):
                 boundry_column = pd.to_numeric(df[boundry], errors='coerce')
                 df_column = pd.to_numeric(df[column], errors='coerce')
 
-                return pd.eval(f"df_column {operator} boundry_column")
+                return eval(f"df_column {operator} boundry_column")
             else:
                 return pd.Series(True, df.index)
