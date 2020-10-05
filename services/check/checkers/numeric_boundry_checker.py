@@ -20,6 +20,6 @@ class NumericBoundryChecker(Checker):
             check = kwargs.get("check")
             operand = check.get("operand")
             operator = check.get("operator")
-            column = pd.to_numeric(df[column], errors='coerce')
+            df_column = pd.to_numeric(df[column], errors='coerce')
 
-            return pd.eval(f"column {operator} {operand}")
+            return pd.eval(f"df_column {operator} {operand}")
