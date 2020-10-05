@@ -4,7 +4,7 @@
 import pandas as pd
 
 from database.modifier_document import ModifierDocument
-from api.utils.storage import get_mapped_df
+from api.utils.storage import get_mapped_df, get_check_results_df
 
 
 def extend_result_df(df, check_result, check_type, field_name, check_level):
@@ -27,6 +27,25 @@ def reindex_result_df(df):
 
     df.columns = new_columns
     return df
+
+
+def apply_errors_filter(file_id, worksheet_id, errors_filter):
+    """Gets all rows that have errors in the specified column or that have the specified error type"""
+
+    error_type = errors_filter.get("level")
+    column_code = errors_filter.get("column")
+    result_df = get_check_results_df(file_id, worksheet_id)
+    indices = set()
+    for column in result_df.columns.values:
+        check_type, field_code, error_type, check_index = eval(column)
+        if (field_code == column_code) or (error_type in [error_type, "all"]):
+            if result_df[column].all():
+                indices = range(0, result_df.shape[0])
+                break
+            else:
+                indices.update(set(result_df.index[result_df[column] == True]))
+    return indices
+
 
 
 def apply_filter(file_id, worksheet_id, filters):
@@ -59,19 +78,13 @@ def apply_filter(file_id, worksheet_id, filters):
             df = df.loc[getattr(pd.to_datetime(df[column], errors='coerce'), date_operators[operator])
                         (pd.to_datetime(value))]
     filter_indices = df.index.tolist()
+    
     return filter_indices
-    # if sort:
-    # 	sort_indices = apply_sort(df, sort)
 
-    # return [elem for elem in sort_indices if elem in filter_indices] if sort_indices else filter_indices
 
 
 def apply_sort(file_id, worksheet_id, sort):
     """Applies sorting on mapped_df for data preview"""
-
-# if not filtred:
-# 	modifier_document = ModifierDocument()
-# 	modifier_document.apply_modifications(df, worksheet_id, is_all=True)
 
     modifier_document = ModifierDocument()
 

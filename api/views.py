@@ -90,11 +90,16 @@ class DataPreview(Resource):
         "operator": fields.String(required=True),
         "value": fields.String(required=True)
     })
+    errors_filter = check_namespace.model("ErrorsFilter",{
+        "level": fields.String(required=True),
+        "column": fields.String(required=True)
+        })
     body_request_params = check_namespace.model("DataPreview", {
         "file_id": fields.String(required=True),
         "worksheet_id": fields.String(required=True),
-        "is_transformed": fields.Boolean(required=True),
+        "is_transformed": fields.Boolean(required=True), 
         "filter": fields.List(fields.Nested(column_filter, required=True), required=False),
+        "errors_filter": fields.Nested(errors_filter, required=False),
         "sort": fields.Nested(sort, required=False)
     })
     @check_namespace.doc("Get paginated exposures")
@@ -105,7 +110,7 @@ class DataPreview(Resource):
             url_params = {param: request.args.get(param) for param in ["page", "nrows"]}
             params = request.get_json()
             exposures = read_exposures(request.base_url, params["file_id"], params["worksheet_id"], url_params, 
-                                       params["is_transformed"], params["sort"], params["filter"])
+                                       params["is_transformed"], params["sort"], params["filter"], params["errors_filter"])
 
             return jsonify(exposures)
         except Exception as exp:

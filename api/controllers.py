@@ -10,7 +10,7 @@ from database.checker_document import CheckerDocument
 from database.job_result_document import JobResultDocument
 from database.modifier_document import ModifierDocument
 from services.cleansing_service import run_checks, check_modifications
-from services.dataframe import apply_filter, apply_sort
+from services.dataframe import apply_filter, apply_sort, apply_errors_filter
 from api.utils.paginator import Paginator
 from api.utils.utils import create_check_metadata, get_dataframe_page
 from api.utils.storage import get_imported_data_df, get_mapped_df, get_check_results_df, save_mapped_df, \
@@ -88,7 +88,7 @@ def start_check_job(job_id, file_id, worksheet_id, mapping_id, domain_id, is_tra
     return job_result_document.save_check_job(data_check_result)
 
 
-def read_exposures(base_url, file_id, worksheet_id, url_params, is_transformed, sort, filters):
+def read_exposures(base_url, file_id, worksheet_id, url_params, is_transformed, sort, filters, errors_filter):
     """Gets paginated data, filters and sorts data"""
 
     if is_transformed:
@@ -98,17 +98,20 @@ def read_exposures(base_url, file_id, worksheet_id, url_params, is_transformed, 
 
     indices = []
     sort_indices = []
-    filter_indices = []
+    filter_indices = set()
     checker_document = CheckerDocument()
 
-    if filters:
-        filter_indices = apply_filter(file_id, worksheet_id, filters)    
+    if errors_filter:
+        filter_indices = apply_errors_filter(file_id, worksheet_id, errors_filter)
 
+    if filters:
+        indices = apply_filter(file_id, worksheet_id, filters)    
+        filter_indices.update(indices)
     if sort:
         sort_indices = apply_sort(file_id, worksheet_id, sort)
         if filter_indices:
             indices = [elem for elem in sort_indices if elem in filter_indices]
-    indices = indices if indices else sort_indices or filter_indices
+    indices = indices if indices else sort_indices or list(filter_indices)
     total_lines = len(indices) if indices else checker_document.get_worksheet_length(worksheet_id)
     preview = get_dataframe_page(file_id, worksheet_id, base_url, url_params, total_lines, indices, sort)
     
