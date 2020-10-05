@@ -22,8 +22,8 @@ class DateBoundryChecker(Checker):
             operand = pd.to_datetime(check.get("operand"), errors="coerce")
 
             if operand in df.columns:
-                column = pd.to_datetime(df[column], errors="coerce")
+                df_column = pd.to_datetime(df[column], errors="coerce")
 
-                return pd.eval(f"column {operator} operand")
+                return pd.eval(f"df_column {operator} operand")
             else:
                 return pd.Series(True, df.index)
