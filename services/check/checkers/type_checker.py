@@ -26,7 +26,7 @@ class TypeChecker(Checker):
             "double": "-?\d*(.?,?\d*)?",
             "boolean": "(yes)|(no)|(False)|(True)",
             "date": "^(\d{4})-(\d{2})-(\d{2})$",
-            "integer": "-?\d*"
+            "integer": "-?[\d]*"
         }
 
         return dict_format.get(field_type, "")
