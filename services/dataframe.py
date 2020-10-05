@@ -32,13 +32,13 @@ def reindex_result_df(df):
 def apply_errors_filter(file_id, worksheet_id, errors_filter):
     """Gets all rows that have errors in the specified column or that have the specified error type"""
 
-    error_type = errors_filter.get("level")
+    error_level = errors_filter.get("level")
     column_code = errors_filter.get("column")
     result_df = get_check_results_df(file_id, worksheet_id)
     indices = set()
     for column in result_df.columns.values:
         check_type, field_code, error_type, check_index = eval(column)
-        if (field_code == column_code) or (error_type in [error_type, "all"]):
+        if (field_code == column_code) or (error_level in [error_type, "all"]):
             if result_df[column].all():
                 indices = range(0, result_df.shape[0])
                 break
