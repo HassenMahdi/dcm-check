@@ -9,11 +9,28 @@ from api.utils.storage import get_mapped_df
 
 def extend_result_df(df, check_result, check_type, field_name, check_level):
     """Append a column to result dataframe"""
-
     column_name = (check_type, field_name, check_level)
     result_df = pd.concat([df, check_result.rename(str(column_name))], axis=1, sort=False)
 
     return result_df
+
+
+def reindex_result_df(df):
+    counters = {}
+    column_index = 0
+    new_columns = []
+    for column in df.columns:
+        current_column_count = counters.get(column, 0)
+        # if current_column_count:
+        column = str(eval(column) + (current_column_count,))
+
+        new_columns.append(column)
+        column_index += 1
+        counters[column] = current_column_count + 1
+
+    df.columns = new_columns
+    return df
+
 
 
 def apply_filter(file_id, worksheet_id, filters):

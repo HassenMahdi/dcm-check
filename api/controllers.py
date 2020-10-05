@@ -133,7 +133,7 @@ def read_result(file_id, worksheet_id, index):
             error = {}
             s_check_res=result_df[column]
             indexes = s_check_res[s_check_res].index
-            check_type, field_code, error_type = eval(column)           
+            check_type, field_code, error_type, check_index = eval(column)
             for index in result_df.index:
                 if index in indexes:
                     target = result.setdefault(count, {})

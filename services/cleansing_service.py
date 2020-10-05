@@ -4,7 +4,7 @@
 import pandas as pd
 import numpy as np
 
-from services.dataframe import extend_result_df
+from services.dataframe import extend_result_df, reindex_result_df
 from database.job_result_document import JobResultDocument
 from services.check.checker_factory import CheckerFactory
 
@@ -72,7 +72,7 @@ def run_checks(final_df, target_fields, data_check_result, metadata=True):
     data_check_result["totalRowsInError"] = len(unique_errors_lines)
     data_check_result["totalErrors"] = total_errors_lines
 
-    return result_df
+    return reindex_result_df(result_df)
 
 
 def check_modifications(final_df, result_df, target_fields, data_check_result, modifications, indices):
@@ -89,7 +89,7 @@ def check_modifications(final_df, result_df, target_fields, data_check_result, m
     modifications_result_df = modifications_result_df.loc[:, ~modifications_result_df.columns.duplicated()]
 
     for column in modifications_result_df.columns.values:
-        check_type, field_code, error_type = eval(column)
+        check_type, field_code, error_type, check_index = eval(column)
         check_column = pd.Series(data=False, index=range(0, result_df.shape[0]))
         check_column.loc[indices] = modifications_result_df[column]
 
@@ -102,7 +102,7 @@ def check_modifications(final_df, result_df, target_fields, data_check_result, m
     update_data_check_metadata(data_check_result, result_df, modified_columns, modifications_result_df, target_fields,
                                indices)
 
-    return result_df
+    return reindex_result_df(result_df)
 
 
 def update_data_check_metadata(data_check_result, result_df, modified_columns, modifications_result_df, target_fields,
@@ -117,7 +117,7 @@ def update_data_check_metadata(data_check_result, result_df, modified_columns, m
     unique_errors_lines = set()
     job_result = {}
     for column in result_df.columns.values:
-        _, field_code, _ = eval(column)
+        _, field_code, _, _ = eval(column)
         if modified_columns.get(field_code) and modifications_result_df.get(column) is None:
             if indices:
                 result_df[column].loc[indices] = False
