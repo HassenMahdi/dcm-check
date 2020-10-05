@@ -14,7 +14,7 @@ class TypeChecker(Checker):
     def check_column(self, df, column, empty_column, *args, **kwargs):
         """Checks the data type for a given column"""
 
-        field_type = kwargs.get("field_type", "String")
+        field_type = kwargs.get("field_type", "string")
         rgx = self.get_regex(field_type)
         match = df[column].astype(str).str.match("^" + rgx + "$", case=False)
         return match
@@ -25,8 +25,8 @@ class TypeChecker(Checker):
         dict_format = {
             "double": "-?\d*(.?,?\d*)?",
             "boolean": "(yes)|(no)|(False)|(True)",
-            "date": "^(\d{4})-(\d{2})-(\d{2})$",
-            "integer": "^[-+]?[1-9]\d*$"
+            "date": "(\d{4})-(\d{2})-(\d{2})",
+            "integer": "[-+]?[1-9]\d*"
         }
 
         return dict_format.get(field_type, "")
