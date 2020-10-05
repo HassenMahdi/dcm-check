@@ -17,16 +17,13 @@ def extend_result_df(df, check_result, check_type, field_name, check_level):
 
 def reindex_result_df(df):
     counters = {}
-    column_index = 0
     new_columns = []
     for column in df.columns:
         current_column_count = counters.get(column, 0)
+        counters[column] = current_column_count + 1
         # if current_column_count:
         column = str(eval(column) + (current_column_count,))
-
         new_columns.append(column)
-        column_index += 1
-        counters[column] = current_column_count + 1
 
     df.columns = new_columns
     return df
