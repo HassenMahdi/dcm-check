@@ -143,6 +143,6 @@ class Paginator:
         paginated_response["index"] = list(range(self.offset, end))
 
         if hasattr(self, "absolute_index"):
-            paginated_response["abolute_index"] = getattr(self, "absolute_index")
+            paginated_response["absolute_index"] = getattr(self, "absolute_index")
 
         return paginated_response
