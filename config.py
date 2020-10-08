@@ -37,7 +37,7 @@ class TestingConfig(Config):
 class ProductionConfig(Config): 
     
     DEBUG = False   
-
+    MONGO_URI = os.getenv('MONGO_URI')
 
 
 config_by_name = dict(  
