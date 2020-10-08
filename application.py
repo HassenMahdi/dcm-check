@@ -20,7 +20,7 @@ def create_app(config_name):
 
     return app
 
-app = create_app(os.getenv('DEPLOY_ENV') or 'dev')
+app = create_app(os.getenv('APP_ENV') or 'dev')
 
 app.app_context().push()
 
