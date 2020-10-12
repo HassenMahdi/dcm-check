@@ -90,11 +90,14 @@ class Paginator:
         delta_nrows = total_exposures - (self.page * self.limit)
         nrows = self.limit if delta_nrows >= 0 else total_exposures - ((self.page - 1) * self.limit)
         end = offset + nrows
-        if filter_indices:
-            indices = filter_indices[offset:end]
-            in_rows = {index + 1 for index in indices}
-            skiprows = set(range(1, max(indices) + 1)) - in_rows if indices else {}
-            self.absolute_index = indices
+        if filter_indices is not None:
+            if len(filter_indices) == 0:
+                skiprows = range(0, total_exposures)
+            else:
+                indices = filter_indices[offset:end]
+                in_rows = {index + 1 for index in indices}
+                skiprows = set(range(1, max(indices) + 1)) - in_rows if indices else {}
+                self.absolute_index = indices
         else:
             skiprows = lambda x: x != 0 and x <= offset
             indices = list(range(offset, end))
@@ -108,13 +111,16 @@ class Paginator:
                                 skiprows=skiprows,
                                 nrows=nrows,
                                 delimiter=';')
+        self.offset = offset
+        if exposures.empty:
+            return exposures
         modifier_document = ModifierDocument()
         exposures.index = indices
         modifier_document.apply_modifications(exposures, worksheet_id, indices=indices)
         end = time.time()
 
         # save offset for later use
-        self.offset = offset
+
 
         print("Paginated exposures loading took %s" % (end - start))
 

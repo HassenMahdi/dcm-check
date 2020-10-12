@@ -9,6 +9,7 @@ from api.utils.storage import get_mapped_df, get_check_results_df
 
 def extend_result_df(df, check_result, check_type, field_name, check_level):
     """Append a column to result dataframe"""
+
     column_name = (check_type, field_name, check_level)
     result_df = pd.concat([df, check_result.rename(str(column_name))], axis=1, sort=False)
 
@@ -21,7 +22,6 @@ def reindex_result_df(df):
     for column in df.columns:
         current_column_count = counters.get(column, 0)
         counters[column] = current_column_count + 1
-        # if current_column_count:
         column = str(eval(column) + (current_column_count,))
         new_columns.append(column)
 
@@ -47,11 +47,9 @@ def apply_errors_filter(file_id, worksheet_id, errors_filter):
     return indices
 
 
-
 def apply_filter(file_id, worksheet_id, filters):
     """Applies the filters on mapped_df for data preview"""
 
-    sort_indices = []
     modifier_document = ModifierDocument()
 
     df = get_mapped_df(file_id, worksheet_id, usecols=[col_filter["column"] for col_filter in filters])
@@ -78,9 +76,7 @@ def apply_filter(file_id, worksheet_id, filters):
             df = df.loc[getattr(pd.to_datetime(df[column], errors='coerce'), date_operators[operator])
                         (pd.to_datetime(value))]
     filter_indices = df.index.tolist()
-    
     return filter_indices
-
 
 
 def apply_sort(file_id, worksheet_id, sort):
