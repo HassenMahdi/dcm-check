@@ -22,7 +22,7 @@ class CheckerDocument:
 
         field_names = collection.find(conditions, {field_name: 1, "_id": 0})
 
-        return {ref_name[field_name] for ref_name in field_names}
+        return {ref_name[field_name].lower() for ref_name in field_names}
 
     def get_all_target_fields(self, domain_id):
         """Fetches all target fields for running check job"""
