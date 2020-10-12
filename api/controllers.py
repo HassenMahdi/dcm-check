@@ -61,7 +61,7 @@ def start_check_job(job_id, file_id, worksheet_id, mapping_id, domain_id, is_tra
         mapped_df = get_mapped_df(file_id, worksheet_id, nrows=nrows, skiprows=skiprows)
         mapped_df.index = rows_indices
         modifier_document.save_modifications(worksheet_id, modifications, user_id)
-        modifier_document.apply_modifications(mapped_df, worksheet_id, rows_indices)
+        modifier_document.apply_modifications(mapped_df, worksheet_id, list(rows_indices))
         data_check_result = create_check_metadata(result_df.reset_index(), job_id, worksheet_id, mapping_id, domain_id)
         result_df = check_modifications(mapped_df, result_df, target_fields, data_check_result, modifications, rows_indices)
 
