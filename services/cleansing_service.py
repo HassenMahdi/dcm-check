@@ -34,6 +34,8 @@ def run_checks(final_df, target_fields, data_check_result, metadata=True):
                                                  checker.check_level)
                     if metadata:
                         error_lines_per_field = final_df[field_code][type_check].index.tolist()
+                        print("TYPE")
+                        print(len(error_lines_per_field))
                         total_errors_per_field = len(error_lines_per_field)
                         if total_errors_per_field:
                             total_errors_lines += total_errors_per_field
