@@ -78,7 +78,7 @@ class Paginator:
             "last": self.__generate_last_link()
         }
 
-    def load_paginated_dataframe(self, path, total_exposures, worksheet_id, filter_indices=None):
+    def load_paginated_dataframe(self, path, total_exposures, worksheet_id, filtred, filter_indices=None):
         self.total = total_exposures
         last_page = math.ceil(self.total / self.limit)
         if last_page <= 0:
@@ -90,7 +90,7 @@ class Paginator:
         delta_nrows = total_exposures - (self.page * self.limit)
         nrows = self.limit if delta_nrows >= 0 else total_exposures - ((self.page - 1) * self.limit)
         end = offset + nrows
-        if filter_indices is not None:
+        if filtred:
             if len(filter_indices) == 0:
                 skiprows = range(0, total_exposures)
             else:
@@ -111,16 +111,15 @@ class Paginator:
                                 skiprows=skiprows,
                                 nrows=nrows,
                                 delimiter=';')
+        # save offset for later use
         self.offset = offset
         if exposures.empty:
+            print("Paginated exposures loading took %s" % (end - start))
             return exposures
         modifier_document = ModifierDocument()
         exposures.index = indices
         modifier_document.apply_modifications(exposures, worksheet_id, indices=indices)
         end = time.time()
-
-        # save offset for later use
-
 
         print("Paginated exposures loading took %s" % (end - start))
 

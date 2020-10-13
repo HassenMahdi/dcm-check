@@ -97,23 +97,26 @@ def read_exposures(base_url, file_id, worksheet_id, url_params, is_transformed, 
         worksheet_id = transformed_path[-1]
 
     indices = []
+    filtred = False
     sort_indices = []
     filter_indices = set()
     checker_document = CheckerDocument()
 
     if errors_filter:
         filter_indices = apply_errors_filter(file_id, worksheet_id, errors_filter)
-
+        filtred = True
     if filters:
         indices = apply_filter(file_id, worksheet_id, filters)    
         filter_indices.update(indices)
+        filtred = True
     if sort:
         sort_indices = apply_sort(file_id, worksheet_id, sort)
         if filter_indices:
             indices = [elem for elem in sort_indices if elem in filter_indices]
+        filtred = True
     indices = indices if indices else sort_indices or list(filter_indices)
     total_lines = len(indices) if indices else checker_document.get_worksheet_length(worksheet_id)
-    preview = get_dataframe_page(file_id, worksheet_id, base_url, url_params, total_lines, indices, sort)
+    preview = get_dataframe_page(file_id, worksheet_id, base_url, url_params, total_lines, filtred, indices, sort)
     
     if preview.get("absolute_index"):
         preview["results"] = read_result(file_id, worksheet_id, preview["absolute_index"])
