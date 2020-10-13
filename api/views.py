@@ -140,14 +140,15 @@ class ChecksMetadata(Resource):
 class CheckModifications(Resource):
 
     body_request_params = check_namespace.model("AuditTrial", {
-        "worksheet_id": fields.String(required=True)
+        "worksheet_id": fields.String(required=True),
+        "domain_id": fields.String(required=True)
     })
     @check_namespace.doc("Get all check modification data")
     @check_namespace.expect(body_request_params)
     def post(self):
         try:
-            worksheet_id = request.get_json()["worksheet_id"]
-            modifications = get_check_modifications(worksheet_id)
+            worksheet_id, domain_id = (request.get_json().get(param) for param in ["worksheet_id", "domain_id"])
+            modifications = get_check_modifications(worksheet_id, domain_id)
             return jsonify(modifications)
 
         except Exception as exp:

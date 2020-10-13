@@ -24,14 +24,14 @@ class CheckerDocument:
 
         return {ref_name[field_name].lower() for ref_name in field_names}
 
-    def get_all_target_fields(self, domain_id):
+    def get_all_target_fields(self, domain_id, keys):
         """Fetches all target fields for running check job"""
 
         domain_fields = self.get_domain_fields(domain_id)
         target_fields = {}
 
         for field in domain_fields:
-            target_fields[field["name"]] = {key: field.get(key) for key in ["label", "type", "rules"]}
+            target_fields[field["name"]] = {key: field.get(key) for key in keys}
         
         return target_fields
 

@@ -46,9 +46,10 @@ def start_check_job(job_id, file_id, worksheet_id, mapping_id, domain_id, is_tra
         file_id = transformed_path[-2]
         worksheet_id = transformed_path[-1]
 
+    keys = ["label", "type", "rules"]
     checker_document = CheckerDocument()
     modifier_document = ModifierDocument()
-    target_fields = checker_document.get_all_target_fields(domain_id)
+    target_fields = checker_document.get_all_target_fields(domain_id, keys)
 
     start = time.time()
     if modifications:
@@ -156,22 +157,26 @@ def read_result(file_id, worksheet_id, index):
         return result
 
 
-def get_check_modifications(worksheet_id):
+def get_check_modifications(worksheet_id, domain_id):
     """Fetches the check modification data"""
 
     audit_trial = {}
-    modifier_document = ModifierDocument()
     user_document = UserDocument()
+    checker_document = CheckerDocument()
+    modifier_document = ModifierDocument()
+
+    target_fields = checker_document.get_all_target_fields(domain_id, ["label"])
     modified_data = modifier_document.get_modifications(worksheet_id, is_all=True)
     for modification in modified_data:
         for column, col_modif in modification["columns"].items():
+            label = target_fields.get(column)["label"]
             line_modif = {"previous": col_modif["previous"][-1], "new": col_modif["new"], 
                           "updated_at": col_modif["updatedAt"],
                           "user": user_document.get_user_fullname(col_modif["userId"])}
-            if audit_trial.get(column):
-                audit_trial[column][modification["line"]] = line_modif
+            if audit_trial.get(label):
+                audit_trial[label][modification["line"]] = line_modif
             else:
-                audit_trial[column] = {}
-                audit_trial[column][modification["line"]] = line_modif 
+                audit_trial[label] = {}
+                audit_trial[label][modification["line"]] = line_modif
 
     return audit_trial
