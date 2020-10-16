@@ -54,23 +54,23 @@ def apply_filter(file_id, worksheet_id, filters):
 
     df = get_mapped_df(file_id, worksheet_id, usecols=[col_filter["column"] for col_filter in filters])
     modifier_document.apply_modifications(df, worksheet_id, is_all=True)
-    date_operators = {"Before": "lt", "After": "gt"}
+    date_operators = {"Before": "lessThan", "After": "greaterThan"}
 
     for column_filter in filters:
         column = column_filter["column"]
         operator = column_filter["operator"]
         value = column_filter.get("value")
-        if operator in ('lt', 'le', 'gt', 'ge'):
+        if operator in ('lessThan', 'lessThanOrEqual', 'greaterThan', 'greaterThanOrEqual'):
             df = df.loc[getattr(pd.to_numeric(df[column], errors='coerce'), operator)(float(value))]
-        elif operator in ('eq', 'ne'):
+        elif operator in ('equals', 'notEqual'):
             df = df.loc[getattr(df[column], operator)(value)]
-        elif operator == 'Contains':
+        elif operator == 'contains':
             df = df.loc[df[column].str.contains(value)]
-        elif operator == 'Not contains':
+        elif operator == 'notContains':
             df = df.loc[~df[column].str.contains(value)]
-        elif operator == 'Starts with':
+        elif operator == 'startsWith':
             df = df.loc[df[column].str.startswith(value)]
-        elif operator == 'Ends with':
+        elif operator == 'endsWith':
             df = df.loc[df[column].str.endswith(value)]
         elif operator == date_operators:
             df = df.loc[getattr(pd.to_datetime(df[column], errors='coerce'), date_operators[operator])
