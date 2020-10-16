@@ -4,7 +4,11 @@
 import pandas as pd
 import numpy as np
 
+<<<<<<< HEAD
 from services.dataframe import extend_result_df
+=======
+from services.dataframe import extend_result_df, reindex_result_df
+>>>>>>> f40dd9415bab8ee43a8ad771c2fcbe515cc2e818
 from database.job_result_document import JobResultDocument
 from services.check.checker_factory import CheckerFactory
 
@@ -26,6 +30,7 @@ def run_checks(final_df, target_fields, data_check_result, metadata=True):
 
         if (field_type != "string") and (not empty_column.all()):
             checker = CheckerFactory.get_checker("TYPE_CHECK")
+<<<<<<< HEAD
             type_check = checker.run(final_df, field_code, empty_column, field_type=field_type)
             if type_check is not None:
                 print("TYPE")
@@ -40,10 +45,30 @@ def run_checks(final_df, target_fields, data_check_result, metadata=True):
                         data_check_result["jobResult"][field_code] = {"name": field_code,
                                                                       "label": field_data["label"],
                                                                       "errors": len(error_lines_per_field)}
+=======
+            # TODO REMOVE IF WHEN APP IS STABLE
+            if checker:
+                type_check = checker.run(final_df, field_code, empty_column, field_type=field_type)
+                if type_check is not None:
+                    result_df = extend_result_df(result_df, type_check, checker.check_code, field_code,
+                                                 checker.check_level)
+                    if metadata:
+                        error_lines_per_field = final_df[field_code][type_check].index.tolist()
+                        print("TYPE")
+                        print(len(error_lines_per_field))
+                        total_errors_per_field = len(error_lines_per_field)
+                        if total_errors_per_field:
+                            total_errors_lines += total_errors_per_field
+                            unique_errors_lines.update(error_lines_per_field)
+                            data_check_result["jobResult"][field_code] = {"name": field_code,
+                                                                          "label": field_data["label"],
+                                                                          "errors": len(error_lines_per_field)}
+>>>>>>> f40dd9415bab8ee43a8ad771c2fcbe515cc2e818
 
         if data_check:
             for check in data_check:
                 checker = CheckerFactory.get_checker(check["type"])
+<<<<<<< HEAD
 
                 check_result = checker.run(final_df, field_code, empty_column, check=check, field_type=field_type,
                                            empty_df=check_empty_df)
@@ -54,6 +79,19 @@ def run_checks(final_df, target_fields, data_check_result, metadata=True):
                     if metadata:
                         error_lines = final_df[field_code][check_result].index.tolist()
                         error_lines_per_field = list(set().union(error_lines_per_field, error_lines, []))
+=======
+                # TODO REMOVE IF WHEN APP IS STABLE
+                if checker:
+                    check_result = checker.run(final_df, field_code, empty_column, check=check, field_type=field_type,
+                                               empty_df=check_empty_df)
+                    if check_result is not None:
+                        print(check["type"])
+                        result_df = extend_result_df(result_df, check_result, checker.check_code, field_code,
+                                                     checker.check_level)
+                        if metadata:
+                            error_lines = final_df[field_code][check_result].index.tolist()
+                            error_lines_per_field = list(set().union(error_lines_per_field, error_lines, []))
+>>>>>>> f40dd9415bab8ee43a8ad771c2fcbe515cc2e818
             print(len(error_lines_per_field))
             total_errors_per_field = len(error_lines_per_field)
             if total_errors_per_field:
@@ -69,7 +107,11 @@ def run_checks(final_df, target_fields, data_check_result, metadata=True):
     data_check_result["totalRowsInError"] = len(unique_errors_lines)
     data_check_result["totalErrors"] = total_errors_lines
 
+<<<<<<< HEAD
     return result_df
+=======
+    return reindex_result_df(result_df)
+>>>>>>> f40dd9415bab8ee43a8ad771c2fcbe515cc2e818
 
 
 def check_modifications(final_df, result_df, target_fields, data_check_result, modifications, indices):
@@ -81,8 +123,13 @@ def check_modifications(final_df, result_df, target_fields, data_check_result, m
     if not modifications_result_df.empty:
         modifications_result_df.index = indices
 
+<<<<<<< HEAD
     for column in modifications_result_df.columns.values:
         check_type, field_code, error_type = eval(column)
+=======
+    for column in modifications_result_df.columns:
+        check_type, field_code, error_type, check_index = eval(column)
+>>>>>>> f40dd9415bab8ee43a8ad771c2fcbe515cc2e818
         check_column = pd.Series(data=False, index=range(0, result_df.shape[0]))
         check_column.loc[indices] = modifications_result_df[column]
 
@@ -90,7 +137,13 @@ def check_modifications(final_df, result_df, target_fields, data_check_result, m
             result_df = extend_result_df(result_df, check_column, check_type,
                                          field_code, error_type)
         else:
+<<<<<<< HEAD
             result_df[column].loc[indices] = check_column
+=======
+            result_df[column].loc[indices] = check_column.loc[indices]
+
+    # result_df = reindex_result_df(result_df)
+>>>>>>> f40dd9415bab8ee43a8ad771c2fcbe515cc2e818
 
     update_data_check_metadata(data_check_result, result_df, modified_columns, modifications_result_df, target_fields,
                                indices)
@@ -106,7 +159,11 @@ def update_data_check_metadata(data_check_result, result_df, modified_columns, m
     unique_errors_lines = set()
     job_result = {}
     for column in result_df.columns.values:
+<<<<<<< HEAD
         _, field_code, _ = eval(column)
+=======
+        _, field_code, _, _ = eval(column)
+>>>>>>> f40dd9415bab8ee43a8ad771c2fcbe515cc2e818
         if modified_columns.get(field_code) and modifications_result_df.get(column) is None:
             if indices:
                 result_df[column].loc[indices] = False
