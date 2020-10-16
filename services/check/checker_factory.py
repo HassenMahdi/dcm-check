@@ -39,10 +39,6 @@ class CheckerFactory(ABC):
         elif check_code == CheckTypesEnum.Property_Boundry.value:
             return PropertyBoundryChecker()
         else:
-<<<<<<< HEAD
-            raise ValueError(check_code)
-=======
             print(f'{check_code} is not a valid check')
             # raise ValueError(f'{check_code} is not a valid check')
             return None
->>>>>>> f40dd9415bab8ee43a8ad771c2fcbe515cc2e818

@@ -29,20 +29,12 @@ def create_check_metadata(df, job_id, worksheet_id, mapping_id, domain_id):
     return data_check_result
 
 
-<<<<<<< HEAD
-def get_dataframe_page(file_id, worksheet_id, base_url, params, total_exposures, indices=None, sort=None):
-=======
 def get_dataframe_page(file_id, worksheet_id, base_url, params, total_exposures, filtred, indices=None, sort=None):
->>>>>>> f40dd9415bab8ee43a8ad771c2fcbe515cc2e818
     """Gets the dataframe page using Paginator class"""
 
     path = get_mapping_path(file_id, worksheet_id)
     paginator = Paginator(base_url=base_url, query_dict=params, page=int(params["page"]), limit=int(params["nrows"]))
-<<<<<<< HEAD
-    data = paginator.load_paginated_dataframe(path, total_exposures, worksheet_id, filter_indices=indices)
-=======
     data = paginator.load_paginated_dataframe(path, total_exposures, worksheet_id, filtred, filter_indices=indices)
->>>>>>> f40dd9415bab8ee43a8ad771c2fcbe515cc2e818
     if sort:
         data.index.name = "index"
         data = data.sort_values(by=[sort["column"], "index"], ascending=sort["order"])

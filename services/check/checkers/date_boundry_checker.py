@@ -20,11 +20,6 @@ class DateBoundryChecker(Checker):
             check = kwargs.get("check")
             operator = check.get("operator")
             operand = pd.to_datetime(check.get("operand"), errors="coerce")
-<<<<<<< HEAD
-            column = pd.to_datetime(df[column], errors="coerce")
-            
-            return pd.eval(f"column {operator} operand")
-=======
 
             if operand in df.columns:
                 df_column = pd.to_datetime(df[column], errors="coerce")
@@ -32,4 +27,3 @@ class DateBoundryChecker(Checker):
                 return eval(f"df_column {operator} operand")
             else:
                 return pd.Series(True, df.index)
->>>>>>> f40dd9415bab8ee43a8ad771c2fcbe515cc2e818
