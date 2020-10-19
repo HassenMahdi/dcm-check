@@ -54,25 +54,27 @@ def apply_filter(file_id, worksheet_id, filters):
 
     df = get_mapped_df(file_id, worksheet_id, usecols=[col_filter["column"] for col_filter in filters])
     modifier_document.apply_modifications(df, worksheet_id, is_all=True)
-    date_operators = {"Before": "lt", "After": "gt"}
+    numeric_operators = {"lessThan": "lt", "lessThanOrEqual": "le", "greaterThan": "gt", "greaterThanOrEqual": "ge"}
+    date_operators = {"before": "lt", "after": "gt"}
+    equality_operators = {"equals": "eq", "notEqual": "ne"}
 
     for column_filter in filters:
         column = column_filter["column"]
         operator = column_filter["operator"]
         value = column_filter.get("value")
-        if operator in ('lt', 'le', 'gt', 'ge'):
-            df = df.loc[getattr(pd.to_numeric(df[column], errors='coerce'), operator)(float(value))]
-        elif operator in ('eq', 'ne'):
-            df = df.loc[getattr(df[column], operator)(value)]
-        elif operator == 'Contains':
+        if operator in numeric_operators:
+            df = df.loc[getattr(pd.to_numeric(df[column], errors='coerce'), numeric_operators[operator])(float(value))]
+        elif operator in equality_operators:
+            df = df.loc[getattr(df[column], equality_operators[operator])(value)]
+        elif operator == 'contains':
             df = df.loc[df[column].str.contains(value)]
-        elif operator == 'Not contains':
+        elif operator == 'notContains':
             df = df.loc[~df[column].str.contains(value)]
-        elif operator == 'Starts with':
+        elif operator == 'startsWith':
             df = df.loc[df[column].str.startswith(value)]
-        elif operator == 'Ends with':
+        elif operator == 'endsWith':
             df = df.loc[df[column].str.endswith(value)]
-        elif operator == date_operators:
+        elif operator in date_operators:
             df = df.loc[getattr(pd.to_datetime(df[column], errors='coerce'), date_operators[operator])
                         (pd.to_datetime(value))]
     filter_indices = df.index.tolist()
