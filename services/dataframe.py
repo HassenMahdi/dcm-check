@@ -58,6 +58,7 @@ def apply_filter(file_id, worksheet_id, filters):
     date_operators = {"before": "lt", "after": "gt"}
     equality_operators = {"equals": "eq", "notEqual": "ne"}
 
+
     for column_filter in filters:
         column = column_filter["column"]
         operator = column_filter["operator"]
