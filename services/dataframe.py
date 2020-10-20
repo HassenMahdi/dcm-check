@@ -66,7 +66,7 @@ def apply_filter(file_id, worksheet_id, filters):
         if operator in numeric_operators:
             df = df.loc[getattr(pd.to_numeric(df[column], errors='coerce'), numeric_operators[operator])(float(value))]
         elif operator in equality_operators:
-            df = df.loc[getattr(df[column], equality_operators[operator])(value)]
+            df = df.loc[getattr(df[column], equality_operators[operator])(str(value))]
         elif operator == 'contains':
             df = df.loc[df[column].str.contains(value)]
         elif operator == 'notContains':
@@ -86,10 +86,11 @@ def apply_sort(file_id, worksheet_id, sort):
     """Applies sorting on mapped_df for data preview"""
 
     modifier_document = ModifierDocument()
+    ordering = {"asc": True, "desc": False}
 
     df = get_mapped_df(file_id, worksheet_id, usecols=[sort["column"]])
     modifier_document.apply_modifications(df, worksheet_id, is_all=True)
     df.index.name = "index"            
-    sort_indices = df.sort_values(by=[sort["column"], "index"], ascending=sort["order"]).index.tolist()
+    sort_indices = df.sort_values(by=[sort["column"], "index"], ascending=ordering[sort["order"]]).index.tolist()
 
     return sort_indices
