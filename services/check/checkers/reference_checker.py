@@ -22,7 +22,8 @@ class ReferenceChecker(Checker):
                 return empty_column | df[column].isin(list_values)
             
             field_name = check.get("field_name")
-            conditions = check.get("conditions", {})
+            conditions = {"ref_type_id": kwargs.get("ref_type_id")}
+            conditions.update(check.get("conditions", {}))
             checker_document = CheckerDocument()
             ref_values = checker_document.get_ref_value(conditions, field_name)
 

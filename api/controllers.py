@@ -46,7 +46,7 @@ def start_check_job(job_id, file_id, worksheet_id, mapping_id, domain_id, is_tra
         file_id = transformed_path[-2]
         worksheet_id = transformed_path[-1]
 
-    keys = ["label", "type", "rules"]
+    keys = ["label", "type", "rules", "ref_type_id"]
     checker_document = CheckerDocument()
     modifier_document = ModifierDocument()
     target_fields = checker_document.get_all_target_fields(domain_id, keys)

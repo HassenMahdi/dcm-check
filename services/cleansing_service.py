@@ -21,6 +21,7 @@ def run_checks(final_df, target_fields, data_check_result, metadata=True):
         print(field_data)
         field_type = field_data["type"]
         data_check = field_data["rules"]
+        ref_type_id = field_data.get("ref_type_id")
         empty_column = check_empty_df[field_code]
         error_lines_per_field = []
 
@@ -50,7 +51,7 @@ def run_checks(final_df, target_fields, data_check_result, metadata=True):
                 # TODO REMOVE IF WHEN APP IS STABLE
                 if checker:
                     check_result = checker.run(final_df, field_code, empty_column, check=check, field_type=field_type,
-                                               empty_df=check_empty_df)
+                                               empty_df=check_empty_df, ref_type_id=ref_type_id)
                     if check_result is not None:
                         print(check["type"])
                         result_df = extend_result_df(result_df, check_result, checker.check_code, field_code,
