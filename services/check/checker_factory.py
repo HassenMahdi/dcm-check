@@ -11,6 +11,7 @@ from services.check.checkers.reference_checker import ReferenceChecker
 from services.check.checkers.date_boundry_checker import DateBoundryChecker
 from services.check.checkers.numeric_boundry_checker import NumericBoundryChecker
 from services.check.checkers.property_boundry_checker import PropertyBoundryChecker
+from services.check.checkers.unicity_checker import UnicityChecker
 
 
 class CheckerFactory(ABC):
@@ -38,6 +39,8 @@ class CheckerFactory(ABC):
             return NumericBoundryChecker()
         elif check_code == CheckTypesEnum.Property_Boundry.value:
             return PropertyBoundryChecker()
+        elif check_code == CheckTypesEnum.Unicity.value:
+            return UnicityChecker()
         else:
             print(f'{check_code} is not a valid check')
             # raise ValueError(f'{check_code} is not a valid check')
