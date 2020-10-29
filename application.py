@@ -9,8 +9,6 @@ from api import check_bp
 from database.connectors import mongo
 
 
-app = create_app(os.getenv('APP_ENV') or 'dev')
-app.register_blueprint(check_bp)
 def create_app(config_name):
     """Creates the flask app and initialize its component"""
 
@@ -21,6 +19,7 @@ def create_app(config_name):
     app.register_blueprint(check_bp)
 
     return app
+
 
 app = create_app(os.getenv('APP_ENV') or 'dev')
 
