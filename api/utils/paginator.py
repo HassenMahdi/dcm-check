@@ -117,7 +117,7 @@ class Paginator:
             print("Paginated exposures loading took %s" % (end - start))
             return exposures
         modifier_document = ModifierDocument()
-        exposures.index = indices
+        exposures.index = sorted(indices)
         modifier_document.apply_modifications(exposures, worksheet_id, indices=indices)
         end = time.time()
 

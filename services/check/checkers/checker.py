@@ -17,8 +17,7 @@ class Checker:
         check = self.check_column(df, column, empty_column, *args, **kwargs)
         if check is not None:
             condition = check == False
-            # if condition.any():
-            #     return condition
+
             return condition
 
     @abstractmethod

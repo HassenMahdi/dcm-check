@@ -23,7 +23,6 @@ def apply_mapping_transformation(df, mapping_id, target_fields):
     checker_document = CheckerDocument()
     transformed_df = pd.DataFrame(columns=list(target_fields.keys()))
     mappings = checker_document.get_mappings(mapping_id)
-
     for target, source in mappings.items():
         data_type = target_fields[target]["type"]
 
@@ -107,8 +106,8 @@ def read_exposures(base_url, file_id, worksheet_id, url_params, is_transformed, 
         filter_indices = apply_errors_filter(file_id, worksheet_id, errors_filter)
         filtred = True
     if filters:
-        indices = apply_filter(file_id, worksheet_id, filters)    
-        filter_indices.update(indices)
+        result_indices = apply_filter(file_id, worksheet_id, filters)
+        filter_indices = filter_indices.intersection(set(result_indices)) if filter_indices else result_indices
         filtred = True
     if sort:
         sort_indices = apply_sort(file_id, worksheet_id, sort)
@@ -136,12 +135,12 @@ def read_result(file_id, worksheet_id, index):
         result_df= result_df.iloc[index]
         result = {}    
         for column in result_df.columns.values:
-            count = 0
             error = {}
             s_check_res=result_df[column]
             indexes = s_check_res[s_check_res].index
             check_type, field_code, error_type, check_index = eval(column)
             for index in result_df.index:
+                count = index
                 if index in indexes:
                     target = result.setdefault(count, {})
                     target = target.setdefault(field_code, {})
@@ -149,7 +148,6 @@ def read_result(file_id, worksheet_id, index):
                     target.append(check_type)
                 else:
                     result.setdefault(count, {})
-                count = count + 1
 
         return result
 
