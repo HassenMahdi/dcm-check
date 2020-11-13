@@ -27,4 +27,4 @@ class ReferenceChecker(Checker):
             checker_document = CheckerDocument()
             ref_values = checker_document.get_ref_value(conditions, field_name)
 
-            return empty_column | df[column].str.lower().isin(ref_values)
+            return empty_column | df[column].str.lower().isin({ref_value.lower() for ref_value in ref_values})

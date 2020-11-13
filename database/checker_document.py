@@ -15,14 +15,16 @@ class CheckerDocument:
         if mapping:
             return {rule["target"]: rule["source"] for rule in mapping["rules"]}
             
-    def get_ref_value(self, conditions, field_name):
+    def get_ref_value(self, conditions, field_name, alias=False):
         """Fetches all field names in the passed collection"""
 
         collection = mongo.db.reference_data
 
-        field_names = collection.find(conditions, {field_name: 1, "_id": 0})
+        field_names = collection.find(conditions, {field_name: 1, "alias": 1, "_id": 0})
+        if alias:
+            return {ref_name[field_name]: ref_name["alias"] for ref_name in field_names}
 
-        return {ref_name[field_name].lower() for ref_name in field_names}
+        return {ref_name[field_name] for ref_name in field_names}
 
     def get_all_target_fields(self, domain_id, keys):
         """Fetches all target fields for running check job"""

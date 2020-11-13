@@ -5,6 +5,8 @@ import uuid
 
 from api.utils.storage import get_mapping_path
 from api.utils.paginator import Paginator
+from database.checker_document import CheckerDocument
+from services.check.check_types_enum import CheckTypesEnum
 
 
 def generate_id():
@@ -40,3 +42,29 @@ def get_dataframe_page(file_id, worksheet_id, base_url, params, total_exposures,
         data = data.sort_values(by=[sort["column"], "index"], ascending=sort["order"])
         
     return paginator.get_paginated_response(data)
+
+
+def replace_alias(cell, ref_values):
+    for field_name, alias in ref_values.items():
+        if cell in alias:
+            return field_name
+    return cell
+
+
+def normalize_data(df, target_fields):
+    """Normalizes data before starting the cleansing"""
+
+    checker_document = CheckerDocument()
+    for field_code, field_data in target_fields.items():
+        ref_type_id = field_data.get("ref_type_id")
+        if ref_type_id:
+            conditions = {"ref_type_id": ref_type_id}
+            for rule in field_data["rules"]:
+                if rule["type"] == CheckTypesEnum.Ref.value:
+                    field_name = rule.get("field_name")
+                    conditions.update(rule.get("conditions", {}))
+                    ref_values = checker_document.get_ref_value(conditions, field_name, alias=True)
+                    df[field_code] = df[field_code].apply(replace_alias, args=(ref_values,))
+                    break
+
+

@@ -11,10 +11,9 @@ from database.job_result_document import JobResultDocument
 from database.modifier_document import ModifierDocument
 from services.cleansing_service import run_checks, check_modifications
 from services.dataframe import apply_filter, apply_sort, apply_errors_filter
-from api.utils.paginator import Paginator
-from api.utils.utils import create_check_metadata, get_dataframe_page
+from api.utils.utils import create_check_metadata, get_dataframe_page, normalize_data
 from api.utils.storage import get_imported_data_df, get_mapped_df, get_check_results_df, save_mapped_df, \
-                              save_check_results_df, get_mapping_path
+                              save_check_results_df
 
 
 def apply_mapping_transformation(df, mapping_id, target_fields):
@@ -25,7 +24,6 @@ def apply_mapping_transformation(df, mapping_id, target_fields):
     mappings = checker_document.get_mappings(mapping_id)
     for target, source in mappings.items():
         data_type = target_fields[target]["type"]
-
         if len(source) > 1:
             if data_type == "string":
                 transformed_df[target] = df[source[0]].str.cat(df[source[1:]].astype(str), sep=" ")
@@ -55,15 +53,17 @@ def start_check_job(job_id, file_id, worksheet_id, mapping_id, domain_id, is_tra
         rows_indices = set()
         rows_indices.update(map(int, modifications.keys()))
         nrows = len(rows_indices)
-        skiprows = set(range(1, max(rows_indices) + 1)) - set([index +1 for index in rows_indices])
+        skiprows = set(range(1, max(rows_indices) + 1)) - set([index + 1 for index in rows_indices])
 
         result_df = get_check_results_df(file_id, worksheet_id)
         mapped_df = get_mapped_df(file_id, worksheet_id, nrows=nrows, skiprows=skiprows)
         mapped_df.index = rows_indices
         modifier_document.save_modifications(worksheet_id, modifications, user_id)
         modifier_document.apply_modifications(mapped_df, worksheet_id, list(rows_indices))
+        normalize_data(mapped_df, target_fields)
         data_check_result = create_check_metadata(result_df.reset_index(), job_id, worksheet_id, mapping_id, domain_id)
-        result_df = check_modifications(mapped_df, result_df, target_fields, data_check_result, modifications, rows_indices)
+        result_df = check_modifications(mapped_df, result_df, target_fields, data_check_result, modifications,
+                                        rows_indices)
 
         save_check_results_df(result_df, file_id, worksheet_id)
         print("end checks")
@@ -74,11 +74,12 @@ def start_check_job(job_id, file_id, worksheet_id, mapping_id, domain_id, is_tra
         df = get_imported_data_df(file_id, worksheet_id, nrows=None, skiprows=None)
         final_df = apply_mapping_transformation(df, mapping_id, target_fields)
         modifier_document.apply_modifications(final_df, worksheet_id, is_all=True)
+        normalize_data(final_df, target_fields)
         save_mapped_df(final_df, file_id, worksheet_id)
         print("end mapping")
         print(time.time() - start)
         data_check_result = create_check_metadata(final_df.reset_index(), job_id, worksheet_id, mapping_id, domain_id)
-        result_df = run_checks(final_df, target_fields,data_check_result)
+        result_df = run_checks(final_df, target_fields, data_check_result)
         save_check_results_df(result_df, file_id, worksheet_id)
         print("end checks")
         print(time.time() - start)
@@ -132,10 +133,9 @@ def read_result(file_id, worksheet_id, index):
     result = {}
     try:
         result_df = get_check_results_df(file_id, worksheet_id)
-        result_df= result_df.iloc[index]
+        result_df = result_df.iloc[index]
         result = {}    
         for column in result_df.columns.values:
-            error = {}
             s_check_res=result_df[column]
             indexes = s_check_res[s_check_res].index
             check_type, field_code, error_type, check_index = eval(column)
