@@ -11,6 +11,7 @@ class Config:
     
     SECRET_KEY = os.getenv('SECRET_KEY', 'my_precious_secret_key')  
     DEBUG = False   
+    PORT = os.getenv('PORT', 5000)
     UPLOAD_FOLDER = "/scor-data/"   
     MONGO_URI = "mongodb://dcm-consmos" \
                 ":pUQRAZMYnTiYikWTxjcq7zQch27litMHCSJnHOu9XCssYxBqVRWmMpd8sSnd0G7w66dQ7GMS4UK8iAvOsoBGtw==@dcm" \
