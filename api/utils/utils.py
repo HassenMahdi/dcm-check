@@ -59,12 +59,5 @@ def normalize_data(df, target_fields):
         ref_type_id = field_data.get("ref_type_id")
         if ref_type_id:
             conditions = {"ref_type_id": ref_type_id}
-            for rule in field_data["rules"]:
-                if rule["type"] == CheckTypesEnum.Ref.value:
-                    field_name = rule.get("field_name")
-                    conditions.update(rule.get("conditions", {}))
-                    ref_values = checker_document.get_ref_value(conditions, field_name, alias=True)
-                    df[field_code] = df[field_code].apply(replace_alias, args=(ref_values,))
-                    break
-
-
+            ref_values = checker_document.get_ref_value(conditions, "code", alias=True)
+            df[field_code] = df[field_code].apply(replace_alias, args=(ref_values,))
