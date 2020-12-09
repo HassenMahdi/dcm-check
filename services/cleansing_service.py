@@ -51,7 +51,8 @@ def run_checks(final_df, target_fields, data_check_result, metadata=True):
                 # TODO REMOVE IF WHEN APP IS STABLE
                 if checker:
                     check_result = checker.run(final_df, field_code, empty_column, check=check, field_type=field_type,
-                                               empty_df=check_empty_df, ref_type_id=ref_type_id)
+                                               empty_df=check_empty_df, ref_type_id=ref_type_id,
+                                               domain_id=data_check_result["domainId"])
                     if check_result is not None:
                         print(check["type"])
                         result_df = extend_result_df(result_df, check_result, checker.check_code, field_code,
