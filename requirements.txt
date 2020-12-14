@@ -1,7 +1,11 @@
 alembic==0.9.6
 aniso8601==8.0.0
-azure-core==1.7.0
-azure-storage-blob==12.6.0
+azure-common==1.1.26
+azure-core==1.9.0
+azure-mgmt-compute==18.0.0
+azure-mgmt-core==1.2.2
+azure-mgmt-datafactory==0.14.0
+azure-storage-blob==12.4.0
 azure-storage-file-share==12.1.2
 bcrypt==3.1.4
 certifi==2020.6.20
