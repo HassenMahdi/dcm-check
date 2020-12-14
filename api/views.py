@@ -23,12 +23,10 @@ class CheckingData(Resource):
         "new": fields.String(required=True)
 })
     column_modification = check_namespace.model("ColumnModification", {
-        "column": fields.String(required=True),
-        "content": fields.Nested(content, required=True)
+        "column": fields.Nested(content, required=True)
     })
     modifications = check_namespace.model("Modifications", {
-        "line": fields.String(required=True),
-        "line_modification": fields.Nested(column_modification, required=True)
+        "line": fields.Nested(column_modification, required=True)
     })
     post_request_body = check_namespace.model("CheckingData", {
         "job_id": fields.String(required=False),
@@ -37,6 +35,7 @@ class CheckingData(Resource):
         "mapping_id": fields.String(required=True),
         "domain_id": fields.String(required=True),
         "is_transformed": fields.Boolean(default=False, required=True),
+        "user_id": fields.String(required=True),
         "modifications": fields.Nested(modifications, required=False)
     })
 
@@ -46,15 +45,17 @@ class CheckingData(Resource):
         if request.method == 'POST':
             try:
                 params = {param: request.get_json().get(param) for param in ["job_id", "file_id", "worksheet_id",
-                                                                             "mapping_id", "domain_id", "is_transformed"]}                
+                                                                             "mapping_id", "domain_id", 
+                                                                             "is_transformed", "user_id"]}                
                 modifications = request.get_json().get("modifications") if params["job_id"] else None
 
                 result = start_check_job(params["job_id"], params["file_id"], params["worksheet_id"], 
                                          params["mapping_id"], params["domain_id"], params["is_transformed"],
-                                         modifications=modifications)
+                                         params["user_id"], modifications=modifications)
 
                 return jsonify(result)
-            except Exception:
+            except Exception as exp:
+                print(exp)
                 traceback.print_exc()
                 return resp.response_with(resp.SERVER_ERROR_500)
 
@@ -69,7 +70,8 @@ class DataGridHeaders(Resource):
             headers = checker_document.get_headers(domain_id)
 
             return jsonify(headers)
-        except Exception:
+        except Exception as exp:
+            print(exp)
             traceback.print_exc()
             return resp.response_with(resp.SERVER_ERROR_500)
 
@@ -88,11 +90,16 @@ class DataPreview(Resource):
         "operator": fields.String(required=True),
         "value": fields.String(required=True)
     })
+    errors_filter = check_namespace.model("ErrorsFilter",{
+        "level": fields.String(required=True),
+        "column": fields.String(required=True)
+        })
     body_request_params = check_namespace.model("DataPreview", {
         "file_id": fields.String(required=True),
         "worksheet_id": fields.String(required=True),
-        "is_transformed": fields.Boolean(required=True),
+        "is_transformed": fields.Boolean(required=True), 
         "filter": fields.List(fields.Nested(column_filter, required=True), required=False),
+        "errors_filter": fields.Nested(errors_filter, required=False),
         "sort": fields.Nested(sort, required=False)
     })
     @check_namespace.doc("Get paginated exposures")
@@ -103,10 +110,11 @@ class DataPreview(Resource):
             url_params = {param: request.args.get(param) for param in ["page", "nrows"]}
             params = request.get_json()
             exposures = read_exposures(request.base_url, params["file_id"], params["worksheet_id"], url_params, 
-                                       params["is_transformed"], params["sort"], params["filter"])
+                                       params["is_transformed"], params["sort"], params["filter"], params["errors_filter"])
 
             return jsonify(exposures)
-        except Exception:
+        except Exception as exp:
+            print(exp)
             traceback.print_exc()
             return resp.response_with(resp.SERVER_ERROR_500)
 
@@ -122,7 +130,8 @@ class ChecksMetadata(Resource):
             del job_metadata["_id"]
 
             return jsonify(job_metadata)
-        except Exception:
+        except Exception as exp:
+            print(exp)
             traceback.print_exc()
             return resp.response_with(resp.SERVER_ERROR_500)
 
@@ -131,16 +140,18 @@ class ChecksMetadata(Resource):
 class CheckModifications(Resource):
 
     body_request_params = check_namespace.model("AuditTrial", {
-        "worksheet_id": fields.String(required=True)
+        "worksheet_id": fields.String(required=True),
+        "domain_id": fields.String(required=True)
     })
     @check_namespace.doc("Get all check modification data")
     @check_namespace.expect(body_request_params)
     def post(self):
         try:
-            worksheet_id = request.get_json()["worksheet_id"]
-            modifications = get_check_modifications(worksheet_id)
+            worksheet_id, domain_id = (request.get_json().get(param) for param in ["worksheet_id", "domain_id"])
+            modifications = get_check_modifications(worksheet_id, domain_id)
             return jsonify(modifications)
 
-        except: 
+        except Exception as exp:
+            print(exp) 
             traceback.print_exc()
             return resp.response_with(resp.SERVER_ERROR_500)

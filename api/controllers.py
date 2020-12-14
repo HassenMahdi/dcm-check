@@ -5,11 +5,12 @@ import time
 
 import pandas as pd
 
+from database.user_document import UserDocument
 from database.checker_document import CheckerDocument
 from database.job_result_document import JobResultDocument
 from database.modifier_document import ModifierDocument
 from services.cleansing_service import run_checks, check_modifications
-from services.dataframe import apply_filter, apply_sort
+from services.dataframe import apply_filter, apply_sort, apply_errors_filter
 from api.utils.paginator import Paginator
 from api.utils.utils import create_check_metadata, get_dataframe_page
 from api.utils.storage import get_imported_data_df, get_mapped_df, get_check_results_df, save_mapped_df, \
@@ -37,7 +38,7 @@ def apply_mapping_transformation(df, mapping_id, target_fields):
     return transformed_df
 
 
-def start_check_job(job_id, file_id, worksheet_id, mapping_id, domain_id, is_transformed, modifications=None):
+def start_check_job(job_id, file_id, worksheet_id, mapping_id, domain_id, is_transformed, user_id, modifications=None):
     """Starts the data check service"""
 
     if is_transformed:
@@ -45,25 +46,23 @@ def start_check_job(job_id, file_id, worksheet_id, mapping_id, domain_id, is_tra
         file_id = transformed_path[-2]
         worksheet_id = transformed_path[-1]
 
+    keys = ["label", "type", "rules"]
     checker_document = CheckerDocument()
     modifier_document = ModifierDocument()
-    target_fields = checker_document.get_all_target_fields(domain_id)
+    target_fields = checker_document.get_all_target_fields(domain_id, keys)
 
     start = time.time()
     if modifications:
-        result_df = get_check_results_df(file_id, worksheet_id)
-        
         rows_indices = set()
-        
         rows_indices.update(map(int, modifications.keys()))
-        print(rows_indices)
         nrows = len(rows_indices)
         skiprows = set(range(1, max(rows_indices) + 1)) - set([index +1 for index in rows_indices])
 
+        result_df = get_check_results_df(file_id, worksheet_id)
         mapped_df = get_mapped_df(file_id, worksheet_id, nrows=nrows, skiprows=skiprows)
         mapped_df.index = rows_indices
-        modifier_document.save_modifications(worksheet_id, modifications)
-        modifier_document.apply_modifications(mapped_df, worksheet_id, rows_indices)
+        modifier_document.save_modifications(worksheet_id, modifications, user_id)
+        modifier_document.apply_modifications(mapped_df, worksheet_id, list(rows_indices))
         data_check_result = create_check_metadata(result_df.reset_index(), job_id, worksheet_id, mapping_id, domain_id)
         result_df = check_modifications(mapped_df, result_df, target_fields, data_check_result, modifications, rows_indices)
 
@@ -90,7 +89,7 @@ def start_check_job(job_id, file_id, worksheet_id, mapping_id, domain_id, is_tra
     return job_result_document.save_check_job(data_check_result)
 
 
-def read_exposures(base_url, file_id, worksheet_id, url_params, is_transformed, sort, filters):
+def read_exposures(base_url, file_id, worksheet_id, url_params, is_transformed, sort, filters, errors_filter):
     """Gets paginated data, filters and sorts data"""
 
     if is_transformed:
@@ -99,20 +98,26 @@ def read_exposures(base_url, file_id, worksheet_id, url_params, is_transformed, 
         worksheet_id = transformed_path[-1]
 
     indices = []
+    filtred = False
     sort_indices = []
-    filter_indices = []
+    filter_indices = set()
     checker_document = CheckerDocument()
 
+    if errors_filter:
+        filter_indices = apply_errors_filter(file_id, worksheet_id, errors_filter)
+        filtred = True
     if filters:
-        filter_indices = apply_filter(file_id, worksheet_id, filters)    
-
+        indices = apply_filter(file_id, worksheet_id, filters)    
+        filter_indices.update(indices)
+        filtred = True
     if sort:
         sort_indices = apply_sort(file_id, worksheet_id, sort)
         if filter_indices:
             indices = [elem for elem in sort_indices if elem in filter_indices]
-    indices = indices if indices else sort_indices or filter_indices
+        filtred = True
+    indices = indices if indices else sort_indices or list(filter_indices)
     total_lines = len(indices) if indices else checker_document.get_worksheet_length(worksheet_id)
-    preview = get_dataframe_page(file_id, worksheet_id, base_url, url_params, total_lines, indices, sort)
+    preview = get_dataframe_page(file_id, worksheet_id, base_url, url_params, total_lines, filtred, indices, sort)
     
     if preview.get("absolute_index"):
         preview["results"] = read_result(file_id, worksheet_id, preview["absolute_index"])
@@ -133,8 +138,9 @@ def read_result(file_id, worksheet_id, index):
         for column in result_df.columns.values:
             count = 0
             error = {}
-            indexes = result_df.index[result_df[column] == True].tolist()
-            check_type, field_code, error_type = eval(column)           
+            s_check_res=result_df[column]
+            indexes = s_check_res[s_check_res].index
+            check_type, field_code, error_type, check_index = eval(column)
             for index in result_df.index:
                 if index in indexes:
                     target = result.setdefault(count, {})
@@ -151,20 +157,26 @@ def read_result(file_id, worksheet_id, index):
         return result
 
 
-def get_check_modifications(worksheet_id):
+def get_check_modifications(worksheet_id, domain_id):
     """Fetches the check modification data"""
 
     audit_trial = {}
+    user_document = UserDocument()
+    checker_document = CheckerDocument()
     modifier_document = ModifierDocument()
 
+    target_fields = checker_document.get_all_target_fields(domain_id, ["label"])
     modified_data = modifier_document.get_modifications(worksheet_id, is_all=True)
     for modification in modified_data:
         for column, col_modif in modification["columns"].items():
-            line_modif = {"previous": col_modif["previous"], "new": col_modif["new"]}
-            if audit_trial.get(column):
-                audit_trial[column][modification["line"]] = line_modif
+            label = target_fields.get(column)["label"]
+            line_modif = {"previous": col_modif["previous"][-1], "new": col_modif["new"], 
+                          "updated_at": col_modif["updatedAt"],
+                          "user": user_document.get_user_fullname(col_modif["userId"])}
+            if audit_trial.get(label):
+                audit_trial[label][modification["line"]] = line_modif
             else:
-                audit_trial[column] = {}
-                audit_trial[column][modification["line"]] = line_modif 
+                audit_trial[label] = {}
+                audit_trial[label][modification["line"]] = line_modif
 
     return audit_trial

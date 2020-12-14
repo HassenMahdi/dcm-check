@@ -2,6 +2,7 @@ import os
 
 from flask import Flask
 from flask_cors import CORS
+from flask_script import Manager
 
 from config import config_by_name
 from api import check_bp
@@ -19,9 +20,18 @@ def create_app(config_name):
 
     return app
 
+app = create_app(os.getenv('DEPLOY_ENV') or 'dev')
+
+app.app_context().push()
+
+manager = Manager(app)
+
+
+@manager.command
+def run():
+    app.run(threaded=True)
 
 app = create_app(os.getenv('DEPLOY_ENV') or 'dev')
 
 if __name__ == '__main__':
-    app.run(port=5000, debug=True)
-
+    manager.run()
