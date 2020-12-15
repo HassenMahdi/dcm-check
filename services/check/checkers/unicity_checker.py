@@ -26,7 +26,7 @@ class UnicityChecker(Checker):
                 tables = azure_blob_downloader.download_all_blobs_in_container(prefix=f'{domain_id}/')
                 if len(tables) > 0:
                     old_data = pa.concat_tables(tables, promote=True).select([column]).to_pandas()
-                    df = pd.concat([df[column], old_data], axis=0, ignore_index=True)
-                    return df.duplicated(keep=False) == False
+                    unique_series = df[column].append(old_data, ignore_index=True)
+                    return unique_series.duplicated(keep=False) == False
 
             return df[column].duplicated(keep=False) == False
