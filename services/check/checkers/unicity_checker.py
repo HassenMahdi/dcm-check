@@ -28,6 +28,6 @@ class UnicityChecker(Checker):
                 if len(tables) > 0:
                     old_data = pa.concat_tables(tables, promote=True).select(column).to_pandas()
                     df = pd.concat([df[column], old_data], axis=0, ignore_index=True)
-                    return pd.Series(df.duplicated(keep=False), df.index)
+                    return pd.Series(df[column].duplicated(keep=False), df.index)
 
             return pd.Series(df[column].duplicated(keep=False), df.index)
