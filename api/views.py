@@ -102,6 +102,7 @@ class DataPreview(Resource):
         "errors_filter": fields.Nested(errors_filter, required=False),
         "sort": fields.Nested(sort, required=False)
     })
+
     @check_namespace.doc("Get paginated exposures")
     @check_namespace.doc(params=url_request_params)
     @check_namespace.expect(body_request_params)

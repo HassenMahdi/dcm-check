@@ -16,6 +16,7 @@ def run_checks(final_df, target_fields, data_check_result, metadata=True):
     result_df = pd.DataFrame()
     unique_errors_lines = set()
     check_empty_df = final_df.isin(["", np.nan, "NaN"])
+    reload_columns = []
 
     for field_code, field_data in target_fields.items():
         print(field_data)
@@ -51,8 +52,8 @@ def run_checks(final_df, target_fields, data_check_result, metadata=True):
                 # TODO REMOVE IF WHEN APP IS STABLE
                 if checker:
                     check_result = checker.run(final_df, field_code, empty_column, check=check, field_type=field_type,
-                                               empty_df=check_empty_df, ref_type_id=ref_type_id,
-                                               domain_id=data_check_result["domainId"])
+                                               empty_df=check_empty_df, ref_type_id=ref_type_id, reload=reload_columns,
+                                               data_check_result=data_check_result)
                     if check_result is not None:
                         print(check["type"])
                         result_df = extend_result_df(result_df, check_result, checker.check_code, field_code,
@@ -74,6 +75,7 @@ def run_checks(final_df, target_fields, data_check_result, metadata=True):
 
     data_check_result["totalRowsInError"] = len(unique_errors_lines)
     data_check_result["totalErrors"] = total_errors_lines
+    data_check_result["reloadColumns"] = reload_columns
 
     return reindex_result_df(result_df)
 
