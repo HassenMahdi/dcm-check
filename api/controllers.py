@@ -9,6 +9,7 @@ from database.user_document import UserDocument
 from database.checker_document import CheckerDocument
 from database.job_result_document import JobResultDocument
 from database.modifier_document import ModifierDocument
+from services.check.checker_factory import CheckerFactory
 from services.cleansing_service import run_checks, check_modifications
 from services.dataframe import apply_filter, apply_sort, apply_errors_filter
 from api.utils.utils import create_check_metadata, get_dataframe_page, normalize_data
@@ -90,7 +91,7 @@ def start_check_job(job_id, file_id, worksheet_id, mapping_id, domain_id, is_tra
     return job_result_document.save_check_job(data_check_result)
 
 
-def read_exposures(base_url, file_id, worksheet_id, url_params, is_transformed, sort, filters, errors_filter):
+def read_exposures(base_url, file_id, worksheet_id, url_params, is_transformed, domain_id, sort, filters, errors_filter):
     """Gets paginated data, filters and sorts data"""
 
     if is_transformed:
@@ -121,21 +122,25 @@ def read_exposures(base_url, file_id, worksheet_id, url_params, is_transformed, 
     preview = get_dataframe_page(file_id, worksheet_id, base_url, url_params, total_lines, filtred, indices, sort)
     
     if preview.get("absolute_index"):
-        preview["results"] = read_result(file_id, worksheet_id, preview["absolute_index"])
+        preview["results"] = read_result(file_id, worksheet_id, domain_id, preview["absolute_index"])
     else:
-        preview["results"] = read_result(file_id, worksheet_id, preview["index"])
+        preview["results"] = read_result(file_id, worksheet_id, domain_id, preview["index"])
     
     return preview
 
 
-def read_result(file_id, worksheet_id, index):
+def read_result(file_id, worksheet_id, domain_id, index):
     """Reads the data check result file"""
 
     result = {}
     try:
+        result = {}
         result_df = get_check_results_df(file_id, worksheet_id)
         result_df = result_df.iloc[index]
-        result = {}    
+        keys = ["label", "type", "rules", "ref_type_id"]
+        checker_document = CheckerDocument()
+        target_fields = checker_document.get_all_target_fields(domain_id, keys)
+
         for column in result_df.columns.values:
             s_check_res=result_df[column]
             indexes = s_check_res[s_check_res].index
@@ -145,8 +150,10 @@ def read_result(file_id, worksheet_id, index):
                 if index in indexes:
                     target = result.setdefault(count, {})
                     target = target.setdefault(field_code, {})
-                    target = target.setdefault(error_type, [])
-                    target.append(check_type)
+                    field_data = target_fields.get(field_code)
+                    checker = CheckerFactory.get_checker(check_type)
+                    error_message = checker.get_message(field_data=field_data, check_type=check_type)
+                    result[count][field_code][error_type] = {"check_type": check_type, "error_message": error_message}
                 else:
                     result.setdefault(count, {})
 

@@ -30,3 +30,10 @@ class TypeChecker(Checker):
         }
 
         return dict_format.get(field_type, "")
+
+    def get_message(self, **kwargs):
+
+        field_type = kwargs.get("field_data").get("type")
+        field_name = kwargs.get("field_data").get("label")
+
+        return f"{field_name} must be a {field_type}"

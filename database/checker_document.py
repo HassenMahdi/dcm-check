@@ -26,6 +26,18 @@ class CheckerDocument:
 
         return {ref_name[field_name] for ref_name in field_names}
 
+    def get_reference_type(self, ref_type_id):
+        """Fetches the reference name based on ref_type_id"""
+
+        reference_type = mongo.db.reference_types
+
+        reference = reference_type.find_one({"_id": ref_type_id})
+
+        if reference.get("parent_id"):
+            reference = reference_type.find_one({"_id": reference.get("parent_id")})
+
+        return {"label": reference.get("label"), "version": reference.get("version_label")}
+
     def get_all_target_fields(self, domain_id, keys):
         """Fetches all target fields for running check job"""
 
@@ -34,7 +46,7 @@ class CheckerDocument:
 
         for field in domain_fields:
             target_fields[field["name"]] = {key: field.get(key) for key in keys}
-        
+
         return target_fields
 
     def get_headers(self, domain_id):

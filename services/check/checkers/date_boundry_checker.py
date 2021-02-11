@@ -27,3 +27,18 @@ class DateBoundryChecker(Checker):
                 return eval(f"df_column {operator} operand")
             else:
                 return pd.Series(True, df.index)
+
+    def get_message(self, **kwargs):
+
+        field_data = kwargs.get("field_data")
+        check = kwargs.get("check_type")
+        field_name = field_data.get("label")
+        rule = {}
+        for check_rule in field_data.get("rules"):
+            if check_rule["type"] == check:
+                rule = check_rule
+                break
+        operator = rule.get("operator")
+        operand = rule.get("operand")
+
+        return f"{field_name} must be {operator} than {operand}"

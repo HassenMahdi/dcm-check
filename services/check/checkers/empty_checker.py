@@ -22,3 +22,9 @@ class EmptyChecker(Checker):
                 empty_column = empty_column & ~related_df[related_field]
 
         return empty_column == False
+
+    def get_message(self, **kwargs):
+
+        field_name = kwargs.get("field_data").get("label")
+
+        return f"{field_name} can not be empty"
