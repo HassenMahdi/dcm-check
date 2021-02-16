@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from app.db.connection import mongo
-import app.main.service.cleansing_service as cleansing_service
+from app.main.service import cleansing_service as cleansing_service
 
 
 
