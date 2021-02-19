@@ -15,4 +15,4 @@ COPY . /usr/src/app
 
 EXPOSE 5000
 
-ENTRYPOINT [ "gunicorn", "-w", "4", "application:app", "--bind", "0.0.0.0:5000"]
+ENTRYPOINT [ "gunicorn", "-w", "4", "application:app", "--bind", "0.0.0.0:5000","--log-level","debug"]
