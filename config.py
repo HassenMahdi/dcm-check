@@ -12,10 +12,8 @@ class Config:
     SECRET_KEY = os.getenv('SECRET_KEY', 'my_precious_secret_key')  
     DEBUG = False   
     UPLOAD_FOLDER = "/scor-data/"
-    MONGO_URI = "mongodb://dcm-consmos" \
-                ":pUQRAZMYnTiYikWTxjcq7zQch27litMHCSJnHOu9XCssYxBqVRWmMpd8sSnd0G7w66dQ7GMS4UK8iAvOsoBGtw==@dcm" \
-                "-consmos.mongo.cosmos.azure.com:10255/dcm?ssl=true&replicaSet=globaldb&retrywrites=false" \
-                "&maxIdleTimeMS=120000&appName=@dcm-consmos@"
+    MONGO_URI = os.getenv("MONGO_URI")
+    # MONGO_URI = "mongodb://root:Bxia!2020DaaTa1920CAvlmd@a4ec5441fc63a4fefbc97353d13465d2-1236515762.eu-west-3.elb.amazonaws.com:27017/dcm?authSource=admin&readPreference=primary&appname=MongoDB%20Compass&ssl=false&retryWrites=false"
     ASA_URI = "BlobEndpoint=https://devdcmstorage.blob.core.windows.net/;" \
               "QueueEndpoint=https://devdcmstorage.queue.core.windows.net/;" \
               "FileEndpoint=https://devdcmstorage.file.core.windows.net/;" \

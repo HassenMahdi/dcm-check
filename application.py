@@ -29,7 +29,7 @@ manager = Manager(app)
 
 @manager.command
 def run():
-    app.run(port=5002, threaded=True)
+    app.run(port=5000, threaded=True)
 
 
 if __name__ == '__main__':

@@ -1,0 +1,15 @@
+version: "2.0"
+
+services: 
+  dcm-datacheck: 
+    build: .
+    environment: 
+      DEBUG: "false"
+      MONGO_URI: "mongodb://root:Bxia!2020DaaTa1920CAvlmd@a4ec5441fc63a4fefbc97353d13465d2-1236515762.eu-west-3.elb.amazonaws.com:27017/dcm?authSource=admin&readPreference=primary&appname=MongoDB%20Compass&ssl=false&retryWrites=false"
+      SECRET_KEY: "my_precious_secret_key"
+      SQLALCHEMY_DATABASE_URI: "sqlite:///urldebase"
+      SQLALCHEMY_TRACK_MODIFICATIONS: "false"
+    ports: 
+      - "5000:5000"
+    volumes: 
+      - ../scor-data:/scor-data
