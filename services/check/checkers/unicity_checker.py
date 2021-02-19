@@ -40,10 +40,3 @@ class UnicityChecker(Checker):
                     return unique_series.duplicated(keep=False)[df.index] == False
 
             return mapped_df[column].duplicated(keep=False)[df.index] == False
-
-    def get_message(self, **kwargs):
-
-        field_data = kwargs.get("field_data")
-        field_name = field_data.get("label")
-
-        return f"{field_name} values must be unique"

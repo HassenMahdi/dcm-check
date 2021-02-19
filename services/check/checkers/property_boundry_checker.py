@@ -28,14 +28,3 @@ class PropertyBoundryChecker(Checker):
                 return eval(f"df_column {operator} boundry_column")
             else:
                 return pd.Series(True, df.index)
-
-    def get_message(self, **kwargs):
-
-        field_data = kwargs.get("field_data")
-        check = kwargs.get("check_type")
-        field_name = field_data.get("label")
-        rule = field_name.get("rules").get(check)
-        operator = rule.get("operator")
-        boundry = rule.get("property")
-
-        return f"{field_name} must be {operator} then {boundry}"

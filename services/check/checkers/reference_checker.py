@@ -20,7 +20,7 @@ class ReferenceChecker(Checker):
             list_values = check.get("values")
             if list_values:
                 return empty_column | df[column].isin(list_values)
-
+            
             field_name = check.get("field_name")
             conditions = {"ref_type_id": kwargs.get("ref_type_id")}
             conditions.update(check.get("conditions", {}))
@@ -28,34 +28,3 @@ class ReferenceChecker(Checker):
             ref_values = checker_document.get_ref_value(conditions, field_name)
 
             return empty_column | df[column].str.lower().isin({ref_value.lower() for ref_value in ref_values})
-
-    def get_message(self, **kwargs):
-
-        field_data = kwargs.get("field_data")
-        rule = {}
-        check = kwargs.get("check_type")
-        field_name = field_data.get("label")
-        ref_type_id = field_data.get("ref_type_id")
-        for check_rule in field_data.get("rules"):
-            if check_rule["type"] == check:
-                rule = check_rule
-                break
-        checker_document = CheckerDocument()
-        reference_type = checker_document.get_reference_type(ref_type_id)
-
-        return f"{field_name} must be {reference_type['label']} ({reference_type['version']})"
-
-    def get_ref_list(self, check, ref_type_id):
-        """Fetches the references values list from the database"""
-
-        list_values = check.get("values")
-        if list_values:
-            return list_values
-
-        field_name = check.get("field_name")
-        conditions = {"ref_type_id": ref_type_id}
-        conditions.update(check.get("conditions", {}))
-        checker_document = CheckerDocument()
-        ref_values = checker_document.get_ref_value(conditions, field_name)
-
-        return ref_values
