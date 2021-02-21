@@ -8,7 +8,7 @@ from config import config_by_name
 from api import check_bp
 from database.connectors import mongo
 
-import logging
+# import logging
 
 
 def create_app(config_name):
@@ -35,10 +35,10 @@ def run():
     app.run(port=5000, threaded=True, debug=True)
 
 
-if __name__ != '__main__':
-    gunicorn_logger = logging.getLogger('gunicorn.error')
-    app.logger.handlers = gunicorn_logger.handlers
-    app.logger.setLevel(gunicorn_logger.level)
+# if __name__ != '__main__':
+#     gunicorn_logger = logging.getLogger('gunicorn.error')
+#     app.logger.handlers = gunicorn_logger.handlers
+#     app.logger.setLevel(gunicorn_logger.level)
 
 if __name__ == '__main__':
     manager.run()
