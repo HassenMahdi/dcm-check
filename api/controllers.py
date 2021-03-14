@@ -152,7 +152,7 @@ def read_result(file_id, worksheet_id, index):
 
         return result
 
-    except pd.errors.EmptyDataError:
+    except Exception as e:
         return result
 
 
